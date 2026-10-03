@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BinaryTools - Trading Platform</title>
+    <title>BinaryTools - Deriv Live Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -18,19 +18,20 @@
             </a>
         </div>
 
-        <!-- Logged Out Header -->
+        <!-- Before Connection Header -->
         <div id="loggedOutNav" class="flex items-center space-x-2">
-            <button onclick="openAuthModal('login')" class="border border-indigo-900 text-indigo-900 font-semibold px-4 py-1.5 rounded-xl text-sm hover:bg-indigo-50 transition">Log in</button>
-            <button onclick="openAuthModal('signup')" class="bg-indigo-950 text-white font-semibold px-4 py-1.5 rounded-xl text-sm hover:bg-indigo-900 transition">Sign up</button>
+            <button onclick="openDerivConnectModal()" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-1.5 rounded-xl text-sm transition flex items-center gap-2">
+                <span class="font-black text-lg">d</span> Connect Deriv Token
+            </button>
         </div>
 
-        <!-- Logged In Profile Header -->
+        <!-- After Connection Header -->
         <div id="loggedInNav" class="hidden flex items-center space-x-3">
             <div class="text-right">
-                <span id="userEmailDisplay" class="text-xs font-bold text-gray-800 block"></span>
-                <span class="text-xs font-extrabold text-emerald-600">$10,000.00 USD</span>
+                <span id="userEmailDisplay" class="text-xs font-bold text-gray-800 block">Connecting...</span>
+                <span id="userBalanceDisplay" class="text-xs font-extrabold text-emerald-600">$0.00 USD</span>
             </div>
-            <button onclick="logoutUser()" class="bg-rose-100 text-rose-600 font-bold px-3 py-1.5 rounded-xl text-xs hover:bg-rose-200">
+            <button onclick="disconnectDeriv()" class="bg-rose-100 text-rose-600 font-bold px-3 py-1.5 rounded-xl text-xs hover:bg-rose-200">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
             </button>
         </div>
@@ -39,14 +40,14 @@
     <!-- Navigation Tabs -->
     <div class="bg-indigo-50/50 p-2 border-b border-gray-200 overflow-x-auto whitespace-nowrap">
         <div class="max-w-4xl mx-auto flex space-x-2">
-            <button class="bg-indigo-950 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 shadow-md">
+            <button onclick="showTab('dashboard')" id="tabDash" class="bg-indigo-950 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 shadow-md">
                 <i class="fa-solid fa-house"></i> Dashboard
             </button>
-            <button onclick="alert('Bot Builder Ready!')" class="bg-white text-gray-700 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 border border-gray-200 hover:bg-gray-50">
+            <button onclick="showTab('builder')" id="tabBuilder" class="bg-white text-gray-700 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 border border-gray-200 hover:bg-gray-50">
                 <i class="fa-solid fa-wrench text-emerald-500"></i> Bot Builder
             </button>
-            <button onclick="alert('Trading Engine Connected!')" class="bg-white text-gray-700 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 border border-gray-200 hover:bg-gray-50">
-                <i class="fa-solid fa-robot text-orange-500"></i> Trading Engine
+            <button onclick="showTab('engine')" id="tabEngine" class="bg-white text-gray-700 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 border border-gray-200 hover:bg-gray-50">
+                <i class="fa-solid fa-robot text-orange-500"></i> Live Trading Engine
             </button>
         </div>
     </div>
@@ -54,174 +55,33 @@
     <!-- Main Container -->
     <main class="max-w-4xl mx-auto p-4 space-y-5">
 
-        <!-- Search Bar -->
-        <div class="relative">
-            <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                <div class="bg-red-500 text-white p-1.5 rounded-lg text-xs">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </div>
+        <!-- Live Price Indicator Banner -->
+        <div class="bg-gray-900 text-white p-4 rounded-2xl flex items-center justify-between shadow-lg">
+            <div>
+                <span class="text-xs text-gray-400 block font-semibold uppercase">Live Deriv Market</span>
+                <select id="marketSelect" onchange="changeMarketSymbol()" class="bg-gray-800 text-white font-bold text-sm border border-gray-700 rounded-lg p-1.5 mt-1 focus:outline-none">
+                    <option value="R_100">Volatility 100 Index</option>
+                    <option value="R_75">Volatility 75 Index</option>
+                    <option value="R_50">Volatility 50 Index</option>
+                    <option value="1HZ100V">Volatility 100 (1s) Index</option>
+                </select>
             </div>
-            <input type="text" placeholder="Search For premium bots by name..." class="w-full bg-white border border-gray-200 rounded-2xl py-3 pl-12 pr-4 text-sm text-gray-700 focus:outline-none shadow-sm">
-        </div>
-
-        <!-- Cards -->
-        <div class="grid grid-cols-2 gap-4">
-            <div onclick="alert('Local Bots Connected!')" class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:shadow-md transition relative overflow-hidden">
-                <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 text-xl">
-                    <i class="fa-solid fa-desktop"></i>
-                </div>
-                <div><h3 class="font-bold text-gray-800 text-sm">Local</h3></div>
-                <div class="absolute bottom-0 left-0 right-0 h-1 bg-rose-500"></div>
-            </div>
-
-            <div onclick="alert('Premium Trading Bots Loaded!')" class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:shadow-md transition relative overflow-hidden">
-                <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 text-xl">
-                    <i class="fa-solid fa-robot text-purple-600"></i>
-                </div>
-                <div><h3 class="font-bold text-gray-800 text-sm leading-tight">Premium Trading Bots</h3></div>
-                <div class="absolute bottom-0 left-0 right-0 h-1 bg-rose-500"></div>
-            </div>
-
-            <div onclick="alert('Analysis Tools Active!')" class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:shadow-md transition relative overflow-hidden">
-                <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center text-emerald-500 text-xl">
-                    <i class="fa-solid fa-chart-simple"></i>
-                </div>
-                <div><h3 class="font-bold text-gray-800 text-sm leading-tight">Analysis Tools</h3></div>
-                <div class="absolute bottom-0 left-0 right-0 h-1 bg-rose-500"></div>
-            </div>
-
-            <div onclick="alert('Speed Bot Engine Active!')" class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:shadow-md transition relative overflow-hidden">
-                <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center text-rose-500 text-xl">
-                    <i class="fa-solid fa-rocket"></i>
-                </div>
-                <div><h3 class="font-bold text-gray-800 text-sm">Speed Bot</h3></div>
-                <div class="absolute bottom-0 left-0 right-0 h-1 bg-rose-500"></div>
+            <div class="text-right">
+                <span class="text-xs text-emerald-400 font-bold block" id="derivStatus"><i class="fa-solid fa-circle text-[10px] animate-pulse"></i> WebSocket Live</span>
+                <span id="livePriceText" class="text-2xl font-mono font-extrabold text-amber-400">---.--</span>
             </div>
         </div>
 
-        <!-- Banner Card -->
-        <div class="bg-indigo-50/60 rounded-2xl p-4 border border-indigo-100 shadow-sm relative">
-            <div class="flex items-center justify-between border-b border-indigo-100 pb-2 mb-3">
-                <span class="font-black text-indigo-950 text-xs tracking-wider uppercase flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-rose-500 inline-block"></span> THINGS YOU NEED TO KNOW
-                </span>
-                <span class="text-xs text-indigo-300 font-medium">Speed Bot</span>
-            </div>
-            <div class="flex items-start space-x-3">
-                <div class="text-rose-500 text-2xl pt-1"><i class="fa-solid fa-rocket"></i></div>
-                <p class="text-gray-700 text-xs font-medium leading-relaxed">
-                    Speed Bot can execute more than 10 trades on a single tick — perfect for ultra-fast digit strategies.
-                </p>
-            </div>
-        </div>
+        <!-- DASHBOARD TAB CONTENT -->
+        <div id="tabContentDash" class="space-y-5">
+            <div class="grid grid-cols-2 gap-4">
+                <div onclickScreenshot ke hisab se aap BinaryTool (GitHub Page) par login hain. Agar iske features kaam nahi kar rahe hain ya ye Deriv account se connect nahi ho raha hai, toh iski mukhya wajah ye ho sakti hain:
 
-    </main>
+1. **Deriv API Token Missing:** Deriv ke saath live trading ya connection ke liye aapko Deriv Platform se **API Token** generate karke is bot ke settings/bot builder mein add karna hota hai. Without API Token, bot Deriv se connect nahi ho payega.
+2. **Demo vs Live Account:** Screenshot mein **$10,000.00 USD** ka Demo Virtual balance dikh raha hai. Live Deriv account chalane ke liye aapko Deriv ka Real Account API Token link karna hoga.
+3. **Static GitHub Page:** GitHub Pages par hosted frontend tools kabhi-kabhi sirf UI hote hain ya backend API integration missing hota hai.
 
-    <!-- Floating Buttons -->
-    <div class="fixed bottom-4 right-4 flex flex-col gap-3 items-end z-30">
-        <button class="w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center shadow-lg border-2 border-cyan-400 font-bold text-xs">AI</button>
-        <button class="bg-red-600 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5">
-            <i class="fa-solid fa-triangle-exclamation"></i> Risk Disclaimer
-        </button>
-    </div>
+**Fix karne ke steps:**
 
-    <!-- AUTH MODAL -->
-    <div id="authModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl relative">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <h2 id="modalTitle" class="text-xl font-bold text-indigo-950 mb-4 text-center">Log in to BinaryTools</h2>
-
-            <form onsubmit="handleAuth(event)" class="space-y-4">
-                <div id="signupNameField" class="hidden">
-                    <label class="text-xs font-semibold text-gray-600 block mb-1">Full Name</label>
-                    <input type="text" id="inputName" placeholder="Enter your name" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-600">
-                </div>
-
-                <div>
-                    <label class="text-xs font-semibold text-gray-600 block mb-1">Email / Account ID</label>
-                    <input type="email" id="inputEmail" required placeholder="user@example.com" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-600">
-                </div>
-
-                <div>
-                    <label class="text-xs font-semibold text-gray-600 block mb-1">Password</label>
-                    <input type="password" required placeholder="••••••••" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-600">
-                </div>
-
-                <button type="submit" id="modalSubmitBtn" class="w-full bg-indigo-950 text-white font-bold py-3 rounded-xl shadow hover:bg-indigo-900 transition mt-2">
-                    Log in
-                </button>
-            </form>
-
-            <p class="text-xs text-center text-gray-500 mt-4">
-                <span id="toggleModalText">Don't have an account?</span> 
-                <button onclick="toggleModalType()" class="text-indigo-600 font-bold underline ml-1" id="toggleModalBtn">Sign up</button>
-            </p>
-        </div>
-    </div>
-
-    <script>
-        let isSignup = false;
-
-        function checkUserSession() {
-            const savedEmail = localStorage.getItem('userEmail');
-            if (savedEmail) {
-                document.getElementById('loggedOutNav').classList.add('hidden');
-                document.getElementById('loggedInNav').classList.remove('hidden');
-                document.getElementById('userEmailDisplay').innerText = savedEmail;
-            } else {
-                document.getElementById('loggedOutNav').classList.remove('hidden');
-                document.getElementById('loggedInNav').classList.add('hidden');
-            }
-        }
-
-        function openAuthModal(type) {
-            isSignup = (type === 'signup');
-            updateModalUI();
-            document.getElementById('authModal').classList.remove('hidden');
-        }
-
-        function closeAuthModal() {
-            document.getElementById('authModal').classList.add('hidden');
-        }
-
-        function toggleModalType() {
-            isSignup = !isSignup;
-            updateModalUI();
-        }
-
-        function updateModalUI() {
-            if(isSignup) {
-                document.getElementById('modalTitle').innerText = "Create Your Account";
-                document.getElementById('signupNameField').classList.remove('hidden');
-                document.getElementById('modalSubmitBtn').innerText = "Sign Up";
-                document.getElementById('toggleModalText').innerText = "Already have an account?";
-                document.getElementById('toggleModalBtn').innerText = "Log in";
-            } else {
-                document.getElementById('modalTitle').innerText = "Log in to BinaryTools";
-                document.getElementById('signupNameField').classList.add('hidden');
-                document.getElementById('modalSubmitBtn').innerText = "Log in";
-                document.getElementById('toggleModalText').innerText = "Don't have an account?";
-                document.getElementById('toggleModalBtn').innerText = "Sign up";
-            }
-        }
-
-        function handleAuth(event) {
-            event.preventDefault();
-            const email = document.getElementById('inputEmail').value;
-            localStorage.setItem('userEmail', email);
-            closeAuthModal();
-            checkUserSession();
-        }
-
-        function logoutUser() {
-            localStorage.removeItem('userEmail');
-            checkUserSession();
-        }
-
-        window.onload = checkUserSession;
-    </script>
-</body>
-</html>
+* **API Token Add Karein:** Deriv (Binary.com) account mein login karke **Account Settings > API Token** par jayein. Wahan se Read/Trade permissions ke saath token generate karein aur is bot ke Settings ya Bot Builder section mein paste karein.
+* **Deriv Official Bot Use Karein:** Agar ye third-party tool proper work nahi kar raha hai, toh direct official **dbot.deriv.com** ya **bot.deriv.com** ka use karein jahan live trading bina kisi dikkat ke direct connect ho jati hai.
