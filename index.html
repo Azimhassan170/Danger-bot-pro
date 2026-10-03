@@ -17,9 +17,22 @@
                 <i class="fa-paper-plane fa-solid"></i> Telegram
             </a>
         </div>
-        <div class="flex items-center space-x-2">
+
+        <!-- Logged Out Header -->
+        <div id="loggedOutNav" class="flex items-center space-x-2">
             <button onclick="openAuthModal('login')" class="border border-indigo-900 text-indigo-900 font-semibold px-4 py-1.5 rounded-xl text-sm hover:bg-indigo-50 transition">Log in</button>
             <button onclick="openAuthModal('signup')" class="bg-indigo-950 text-white font-semibold px-4 py-1.5 rounded-xl text-sm hover:bg-indigo-900 transition">Sign up</button>
+        </div>
+
+        <!-- Logged In Profile Header -->
+        <div id="loggedInNav" class="hidden flex items-center space-x-3">
+            <div class="text-right">
+                <span id="userEmailDisplay" class="text-xs font-bold text-gray-800 block"></span>
+                <span class="text-xs font-extrabold text-emerald-600">$10,000.00 USD</span>
+            </div>
+            <button onclick="logoutUser()" class="bg-rose-100 text-rose-600 font-bold px-3 py-1.5 rounded-xl text-xs hover:bg-rose-200">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
         </div>
     </header>
 
@@ -29,10 +42,10 @@
             <button class="bg-indigo-950 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 shadow-md">
                 <i class="fa-solid fa-house"></i> Dashboard
             </button>
-            <button class="bg-white text-gray-700 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 border border-gray-200 hover:bg-gray-50">
+            <button onclick="alert('Bot Builder Ready!')" class="bg-white text-gray-700 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 border border-gray-200 hover:bg-gray-50">
                 <i class="fa-solid fa-wrench text-emerald-500"></i> Bot Builder
             </button>
-            <button class="bg-white text-gray-700 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 border border-gray-200 hover:bg-gray-50">
+            <button onclick="alert('Trading Engine Connected!')" class="bg-white text-gray-700 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 border border-gray-200 hover:bg-gray-50">
                 <i class="fa-solid fa-robot text-orange-500"></i> Trading Engine
             </button>
         </div>
@@ -51,49 +64,39 @@
             <input type="text" placeholder="Search For premium bots by name..." class="w-full bg-white border border-gray-200 rounded-2xl py-3 pl-12 pr-4 text-sm text-gray-700 focus:outline-none shadow-sm">
         </div>
 
-        <!-- Grid Options Cards -->
+        <!-- Cards -->
         <div class="grid grid-cols-2 gap-4">
-            
-            <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:shadow-md transition relative overflow-hidden">
+            <div onclick="alert('Local Bots Connected!')" class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:shadow-md transition relative overflow-hidden">
                 <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 text-xl">
                     <i class="fa-solid fa-desktop"></i>
                 </div>
-                <div>
-                    <h3 class="font-bold text-gray-800 text-sm">Local</h3>
-                </div>
+                <div><h3 class="font-bold text-gray-800 text-sm">Local</h3></div>
                 <div class="absolute bottom-0 left-0 right-0 h-1 bg-rose-500"></div>
             </div>
 
-            <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:shadow-md transition relative overflow-hidden">
+            <div onclick="alert('Premium Trading Bots Loaded!')" class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:shadow-md transition relative overflow-hidden">
                 <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 text-xl">
                     <i class="fa-solid fa-robot text-purple-600"></i>
                 </div>
-                <div>
-                    <h3 class="font-bold text-gray-800 text-sm leading-tight">Premium Trading Bots</h3>
-                </div>
+                <div><h3 class="font-bold text-gray-800 text-sm leading-tight">Premium Trading Bots</h3></div>
                 <div class="absolute bottom-0 left-0 right-0 h-1 bg-rose-500"></div>
             </div>
 
-            <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:shadow-md transition relative overflow-hidden">
+            <div onclick="alert('Analysis Tools Active!')" class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:shadow-md transition relative overflow-hidden">
                 <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center text-emerald-500 text-xl">
                     <i class="fa-solid fa-chart-simple"></i>
                 </div>
-                <div>
-                    <h3 class="font-bold text-gray-800 text-sm leading-tight">Analysis Tools</h3>
-                </div>
+                <div><h3 class="font-bold text-gray-800 text-sm leading-tight">Analysis Tools</h3></div>
                 <div class="absolute bottom-0 left-0 right-0 h-1 bg-rose-500"></div>
             </div>
 
-            <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:shadow-md transition relative overflow-hidden">
+            <div onclick="alert('Speed Bot Engine Active!')" class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:shadow-md transition relative overflow-hidden">
                 <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center text-rose-500 text-xl">
                     <i class="fa-solid fa-rocket"></i>
                 </div>
-                <div>
-                    <h3 class="font-bold text-gray-800 text-sm">Speed Bot</h3>
-                </div>
+                <div><h3 class="font-bold text-gray-800 text-sm">Speed Bot</h3></div>
                 <div class="absolute bottom-0 left-0 right-0 h-1 bg-rose-500"></div>
             </div>
-
         </div>
 
         <!-- Banner Card -->
@@ -105,19 +108,10 @@
                 <span class="text-xs text-indigo-300 font-medium">Speed Bot</span>
             </div>
             <div class="flex items-start space-x-3">
-                <div class="text-rose-500 text-2xl pt-1">
-                    <i class="fa-solid fa-rocket"></i>
-                </div>
+                <div class="text-rose-500 text-2xl pt-1"><i class="fa-solid fa-rocket"></i></div>
                 <p class="text-gray-700 text-xs font-medium leading-relaxed">
                     Speed Bot can execute more than 10 trades on a single tick — perfect for ultra-fast digit strategies.
                 </p>
-            </div>
-            <div class="flex justify-center space-x-1.5 mt-4">
-                <span class="w-4 h-1.5 bg-rose-500 rounded-full"></span>
-                <span class="w-1.5 h-1.5 bg-indigo-200 rounded-full"></span>
-                <span class="w-1.5 h-1.5 bg-indigo-200 rounded-full"></span>
-                <span class="w-1.5 h-1.5 bg-indigo-200 rounded-full"></span>
-                <span class="w-1.5 h-1.5 bg-indigo-200 rounded-full"></span>
             </div>
         </div>
 
@@ -125,15 +119,13 @@
 
     <!-- Floating Buttons -->
     <div class="fixed bottom-4 right-4 flex flex-col gap-3 items-end z-30">
-        <button class="w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center shadow-lg border-2 border-cyan-400 font-bold text-xs">
-            AI
-        </button>
+        <button class="w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center shadow-lg border-2 border-cyan-400 font-bold text-xs">AI</button>
         <button class="bg-red-600 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5">
             <i class="fa-solid fa-triangle-exclamation"></i> Risk Disclaimer
         </button>
     </div>
 
-    <!-- LOGIN / SIGNUP MODAL -->
+    <!-- AUTH MODAL -->
     <div id="authModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl relative">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg">
@@ -145,12 +137,12 @@
             <form onsubmit="handleAuth(event)" class="space-y-4">
                 <div id="signupNameField" class="hidden">
                     <label class="text-xs font-semibold text-gray-600 block mb-1">Full Name</label>
-                    <input type="text" placeholder="Enter your name" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-600">
+                    <input type="text" id="inputName" placeholder="Enter your name" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-600">
                 </div>
 
                 <div>
                     <label class="text-xs font-semibold text-gray-600 block mb-1">Email / Account ID</label>
-                    <input type="email" required placeholder="user@example.com" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-600">
+                    <input type="email" id="inputEmail" required placeholder="user@example.com" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-600">
                 </div>
 
                 <div>
@@ -172,6 +164,18 @@
 
     <script>
         let isSignup = false;
+
+        function checkUserSession() {
+            const savedEmail = localStorage.getItem('userEmail');
+            if (savedEmail) {
+                document.getElementById('loggedOutNav').classList.add('hidden');
+                document.getElementById('loggedInNav').classList.remove('hidden');
+                document.getElementById('userEmailDisplay').innerText = savedEmail;
+            } else {
+                document.getElementById('loggedOutNav').classList.remove('hidden');
+                document.getElementById('loggedInNav').classList.add('hidden');
+            }
+        }
 
         function openAuthModal(type) {
             isSignup = (type === 'signup');
@@ -206,9 +210,18 @@
 
         function handleAuth(event) {
             event.preventDefault();
-            alert(isSignup ? "Sign Up Successful!" : "Logged in successfully!");
+            const email = document.getElementById('inputEmail').value;
+            localStorage.setItem('userEmail', email);
             closeAuthModal();
+            checkUserSession();
         }
+
+        function logoutUser() {
+            localStorage.removeItem('userEmail');
+            checkUserSession();
+        }
+
+        window.onload = checkUserSession;
     </script>
 </body>
 </html>
