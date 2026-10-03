@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BinaryTools Pro - Deriv Bot Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white min-h-screen font-sans">
+
+    <!-- Top Navigation Bar -->
+    <nav class="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <span class="text-2xl font-bold text-indigo-500"><i class="fa-solid fa-robot"></i> BinaryTools</span>
+            <span class="bg-indigo-900 text-indigo-300 text-xs px-2.5 py-0.5 rounded-full">v2.0 Pro</span>
+        </div>
+        <div class="flex items-center space-x-3">
+            <button id="toggleModeBtn" onclick="switchMode()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition">
+                <i class="fa-solid fa-repeat"></i> Mode: Automatic
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto p-4 grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+
+        <!-- Left Sidebar: OAuth & Controls -->
+        <div class="space-y-6">
+            
+            <!-- Auth Card -->
+            <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-xl">
+                <h3 class="text-lg font-semibold mb-4 text-gray-200">Account Access</h3>
+                
+                <!-- Continue with Deriv Button -->
+                <button onclick="loginDeriv()" class="w-full mb-3 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl shadow transition flex items-center justify-center gap-2">
+                    <span class="font-extrabold text-lg">d</span>
+                    <span>Continue with Deriv</span>
+                </button>
+
+                <!-- Power / Google Drive Access Button -->
+                <button onclick="loginPowerDrive()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-xl shadow transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Sign in with Power / Drive</span>
+                </button>
+
+                <div class="mt-4 p-3 bg-gray-900 rounded-lg border border-gray-700">
+                    <p class="text-xs text-gray-400">Connection Status: <span id="connStatus" class="text-yellow-400 font-bold">Connecting...</span></p>
+                    <p class="text-xs text-gray-400 mt-1">Balance: <span id="userBalance" class="text-emerald-400 font-bold">$0.00</span></p>
+                </div>
+            </div>
+
+            <!-- Risk Management -->
+            <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-xl">
+                <h3 class="text-lg font-semibold mb-3 text-gray-200"><i class="fa-solid fa-shield-halved text-emerald-400"></i> Risk Settings</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs text-gray-400">Initial Stake ($)</label>
+                        <input type="number" id="stakeInput" value="0.35" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-white focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400">Target Profit ($)</label>
+                        <input type="number" id="tpInput" value="5.00" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-white focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400">Stop Loss ($)</label>
+                        <input type="number" id="slInput" value="10.00" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-white focus:outline-none">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Center Window: Trading Engine -->
+        <div class="md:col-span-2 space-y-6">
+
+            <!-- AUTOMATIC BOT MODE PANEL -->
+            <div id="autoBotPanel" class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-indigo-400"><i class="fa-solid fa-robot"></i> Automatic Bot Engine</h2>
+                    <input type="file" id="xmlFileInput" accept=".xml" class="hidden" onchange="loadXMLBot(event)">
+                    <button onclick="document.getElementById('xmlFileInput').click()" class="bg-gray-700 hover:bg-gray-600 text-xs px-3 py-2 rounded-lg text-gray-200">
+                        <i class="fa-solid fa-file-code"></i> Load Custom Bot XML
+                    </button>
+                </div>
+
+                <!-- Bot Status & Run Button -->
+                <div class="bg-gray-900 p-4 rounded-xl border border-gray-700 mb-6 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-gray-400 block">Loaded Bot Strategy</span>
+                        <span id="botName" class="font-bold text-emerald-400">Gold/Vol Trend Follower Auto Engine</span>
+                    </div>
+                    <div>
+                        <button id="runBotBtn" onclick="toggleBot()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-lg shadow">
+                            <i class="fa-solid fa-play"></i> START BOT
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Real-time Market Display -->
+                <div class="bg-gray-900 p-6 rounded-xl border border-gray-700 flex flex-col items-center justify-center space-y-2">
+                    <span class="text-xs text-gray-400 uppercase tracking-widest">Live Market Price (Gold / Index)</span>
+                    <span id="livePrice" class="text-4xl font-extrabold text-amber-400 font-mono">0.00</span>
+                </div>
+            </div>
+
+            <!-- MANUAL PANEL (Hidden default) -->
+            <div id="manualPanel" class="hidden bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-xl">
+                <h2 class="text-xl font-bold text-amber-400 mb-4"><i class="fa-solid fa-hand-pointer"></i> Manual Trading Console</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="executeManual('BUY')" class="bg-emerald-600 hover:bg-emerald-700 py-6 rounded-xl font-bold text-xl flex flex-col items-center">
+                        <i class="fa-solid fa-arrow-trend-up text-2xl mb-1"></i>
+                        <span>HIGHER / BUY</span>
+                    </button>
+                    <button onclick="executeManual('SELL')" class="bg-rose-600 hover:bg-rose-700 py-6 rounded-xl font-bold text-xl flex flex-col items-center">
+                        <i class="fa-solid fa-arrow-trend-down text-2xl mb-1"></i>
+                        <span>LOWER / SELL</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Live Trade Logs -->
+            <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-xl">
+                <h3 class="text-md font-semibold mb-3 text-gray-300">Live Trade Log</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-gray-400">
+                        <thead class="bg-gray-900 text-gray-300 uppercase">
+                            <tr>
+                                <th class="p-2">Time</th>
+                                <th class="p-2">Action</th>
+                                <th class="p-2">Stake</th>
+                                <th class="p-2">Result</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tradeLogTable">
+                            <!-- Logs populate here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        const DERIV_APP_ID = '34zAit2vU5ON3W5mYPRHI';
+        let ws;
+        let isAutoMode = true;
+        let isBotRunning = false;
+
+        // Initialize Deriv WebSocket Connection
+        function initWebSocket() {
+            ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${DERIV_APP_ID}`);
+
+            ws.onopen = function() {
+                document.getElementById('connStatus').innerText = "Connected to Deriv API";
+                document.getElementById('connStatus').className = "text-emerald-400 font-bold";
+
+                // Check OAuth token in URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const token = urlParams.get('token1');
+                if (token) {
+                    authorizeAccount(token);
+                } else {
+                    // Subscribe to Gold ticks for demo display
+                    ws.send(JSON.stringify({ ticks: "frxXAUUSD" }));
+                }
+            };
+
+            ws.onmessage = function(msg) {
+                const data = JSON.parse(msg.data);
+
+                // Handle Tick Stream
+                if (data.msg_type === 'tick') {
+                    document.getElementById('livePrice').innerText = data.tick.quote;
+                }
+
+                // Handle Authorization
+                if (data.msg_type === 'authorize') {
+                    document.getElementById('connStatus').innerText = "Authorized: " + data.authorize.email;
+                    document.getElementById('userBalance').innerText = "$" + data.authorize.balance;
+                }
+            };
+
+            ws.onerror = function() {
+                document.getElementById('connStatus').innerText = "Connection Error";
+                document.getElementById('connStatus').className = "text-rose-500 font-bold";
+            };
+        }
+
+        // Redirect to Deriv OAuth Login
+        function loginDeriv() {
+            const redirectUrl = encodeURIComponent(window.location.href.split('?')[0]);
+            window.location.href = `https://oauth.deriv.com/oauth2/authorize?app_id=${DERIV_APP_ID}&l=EN`;
+        }
+
+        function authorizeAccount(token) {
+            ws.send(JSON.stringify({ authorize: token }));
+        }
+
+        function loginPowerDrive() {
+            alert("Power/Drive Authentication Connected!");
+        }
+
+        function switchMode() {
+            isAutoMode = !isAutoMode;
+            document.getElementById('autoBotPanel').classList.toggle('hidden', !isAutoMode);
+            document.getElementById('manualPanel').classList.toggle('hidden', isAutoMode);
+            document.getElementById('toggleModeBtn').innerHTML = isAutoMode ? 
+                '<i class="fa-solid fa-repeat"></i> Mode: Automatic' : 
+                '<i class="fa-solid fa-repeat"></i> Mode: Manual';
+        }
+
+        function loadXMLBot(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('botName').innerText = file.name;
+                alert("Bot Strategy Loaded: " + file.name);
+            }
+        }
+
+        function toggleBot() {
+            isBotRunning = !isBotRunning;
+            const btn = document.getElementById('runBotBtn');
+            if (isBotRunning) {
+                btn.className = "bg-rose-600 hover:bg-rose-700 text-white font-bold px-6 py-2 rounded-lg shadow";
+                btn.innerHTML = '<i class="fa-solid fa-square"></i> STOP BOT';
+            } else {
+                btn.className = "bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-lg shadow";
+                btn.innerHTML = '<i class="fa-solid fa-play"></i> START BOT';
+            }
+        }
+
+        function executeManual(type) {
+            alert("Manual Trade Triggered: " + type);
+        }
+
+        // Start connection on load
+        window.onload = initWebSocket;
+    </script>
+</body>
+</html>
