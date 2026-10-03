@@ -1,254 +1,214 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BinaryTools Pro - Deriv Bot Dashboard</title>
+    <title>BinaryTools - Trading Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-900 text-white min-h-screen font-sans">
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen pb-16">
 
-    <!-- Top Navigation Bar -->
-    <nav class="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between">
+    <!-- Top Header Bar -->
+    <header class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40 shadow-sm">
         <div class="flex items-center space-x-3">
-            <span class="text-2xl font-bold text-indigo-500"><i class="fa-solid fa-robot"></i> BinaryTools</span>
-            <span class="bg-indigo-900 text-indigo-300 text-xs px-2.5 py-0.5 rounded-full">v2.0 Pro</span>
+            <button class="text-gray-600 text-xl"><i class="fa-solid fa-bars"></i></button>
+            <a href="https://t.me" target="_blank" class="bg-sky-500 hover:bg-sky-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1">
+                <i class="fa-paper-plane fa-solid"></i> Telegram
+            </a>
         </div>
-        <div class="flex items-center space-x-3">
-            <button id="toggleModeBtn" onclick="switchMode()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition">
-                <i class="fa-solid fa-repeat"></i> Mode: Automatic
+        <div class="flex items-center space-x-2">
+            <button onclick="openAuthModal('login')" class="border border-indigo-900 text-indigo-900 font-semibold px-4 py-1.5 rounded-xl text-sm hover:bg-indigo-50 transition">Log in</button>
+            <button onclick="openAuthModal('signup')" class="bg-indigo-950 text-white font-semibold px-4 py-1.5 rounded-xl text-sm hover:bg-indigo-900 transition">Sign up</button>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-indigo-50/50 p-2 border-b border-gray-200 overflow-x-auto whitespace-nowrap">
+        <div class="max-w-4xl mx-auto flex space-x-2">
+            <button class="bg-indigo-950 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 shadow-md">
+                <i class="fa-solid fa-house"></i> Dashboard
+            </button>
+            <button class="bg-white text-gray-700 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 border border-gray-200 hover:bg-gray-50">
+                <i class="fa-solid fa-wrench text-emerald-500"></i> Bot Builder
+            </button>
+            <button class="bg-white text-gray-700 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 border border-gray-200 hover:bg-gray-50">
+                <i class="fa-solid fa-robot text-orange-500"></i> Trading Engine
             </button>
         </div>
-    </nav>
+    </div>
 
     <!-- Main Container -->
-    <div class="max-w-7xl mx-auto p-4 grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+    <main class="max-w-4xl mx-auto p-4 space-y-5">
 
-        <!-- Left Sidebar: OAuth & Controls -->
-        <div class="space-y-6">
+        <!-- Search Bar -->
+        <div class="relative">
+            <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <div class="bg-red-500 text-white p-1.5 rounded-lg text-xs">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+            </div>
+            <input type="text" placeholder="Search For premium bots by name..." class="w-full bg-white border border-gray-200 rounded-2xl py-3 pl-12 pr-4 text-sm text-gray-700 focus:outline-none shadow-sm">
+        </div>
+
+        <!-- Grid Options Cards -->
+        <div class="grid grid-cols-2 gap-4">
             
-            <!-- Auth Card -->
-            <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-xl">
-                <h3 class="text-lg font-semibold mb-4 text-gray-200">Account Access</h3>
-                
-                <button onclick="loginDeriv()" class="w-full mb-3 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl shadow transition flex items-center justify-center gap-2">
-                    <span class="font-extrabold text-lg">d</span>
-                    <span>Continue with Deriv</span>
-                </button>
-
-                <button onclick="loginPowerDrive()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-xl shadow transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-bolt"></i>
-                    <span>Sign in with Power / Drive</span>
-                </button>
-
-                <div class="mt-4 p-3 bg-gray-900 rounded-lg border border-gray-700">
-                    <p class="text-xs text-gray-400">Connection Status: <span id="connStatus" class="text-yellow-400 font-bold">Connecting...</span></p>
-                    <p class="text-xs text-gray-400 mt-1">Balance: <span id="userBalance" class="text-emerald-400 font-bold">$0.00</span></p>
+            <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:shadow-md transition relative overflow-hidden">
+                <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 text-xl">
+                    <i class="fa-solid fa-desktop"></i>
                 </div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">Local</h3>
+                </div>
+                <div class="absolute bottom-0 left-0 right-0 h-1 bg-rose-500"></div>
             </div>
 
-            <!-- Market Selection & Risk Settings -->
-            <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-xl">
-                <h3 class="text-lg font-semibold mb-3 text-gray-200"><i class="fa-solid fa-chart-line text-indigo-400"></i> Market & Risk Settings</h3>
-                <div class="space-y-3">
-                    <div>
-                        <label class="text-xs text-gray-400">Select Asset / Market</label>
-                        <select id="marketSelect" onchange="changeMarket()" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-white focus:outline-none">
-                            <option value="R_100">Volatility 100 Index</option>
-                            <option value="R_75">Volatility 75 Index</option>
-                            <option value="R_50">Volatility 50 Index</option>
-                            <option value="R_25">Volatility 25 Index</option>
-                            <option value="R_10">Volatility 10 Index</option>
-                            <option value="1HZ100V">Volatility 100 (1s) Index</option>
-                            <option value="frxXAUUSD">Gold / USD (Forex)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-400">Initial Stake ($)</label>
-                        <input type="number" id="stakeInput" value="0.35" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-white focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-400">Target Profit ($)</label>
-                        <input type="number" id="tpInput" value="5.00" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-white focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-400">Stop Loss ($)</label>
-                        <input type="number" id="slInput" value="10.00" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-white focus:outline-none">
-                    </div>
+            <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:shadow-md transition relative overflow-hidden">
+                <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 text-xl">
+                    <i class="fa-solid fa-robot text-purple-600"></i>
                 </div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm leading-tight">Premium Trading Bots</h3>
+                </div>
+                <div class="absolute bottom-0 left-0 right-0 h-1 bg-rose-500"></div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:shadow-md transition relative overflow-hidden">
+                <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center text-emerald-500 text-xl">
+                    <i class="fa-solid fa-chart-simple"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm leading-tight">Analysis Tools</h3>
+                </div>
+                <div class="absolute bottom-0 left-0 right-0 h-1 bg-rose-500"></div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:shadow-md transition relative overflow-hidden">
+                <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center text-rose-500 text-xl">
+                    <i class="fa-solid fa-rocket"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">Speed Bot</h3>
+                </div>
+                <div class="absolute bottom-0 left-0 right-0 h-1 bg-rose-500"></div>
             </div>
 
         </div>
 
-        <!-- Center Window: Trading Engine -->
-        <div class="md:col-span-2 space-y-6">
-
-            <!-- AUTOMATIC BOT MODE PANEL -->
-            <div id="autoBotPanel" class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-xl">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold text-indigo-400"><i class="fa-solid fa-robot"></i> Automatic Bot Engine</h2>
-                    <input type="file" id="xmlFileInput" accept=".xml" class="hidden" onchange="loadXMLBot(event)">
-                    <button onclick="document.getElementById('xmlFileInput').click()" class="bg-gray-700 hover:bg-gray-600 text-xs px-3 py-2 rounded-lg text-gray-200">
-                        <i class="fa-solid fa-file-code"></i> Load Custom Bot XML
-                    </button>
-                </div>
-
-                <div class="bg-gray-900 p-4 rounded-xl border border-gray-700 mb-6 flex items-center justify-between">
-                    <div>
-                        <span class="text-xs text-gray-400 block">Loaded Bot Strategy</span>
-                        <span id="botName" class="font-bold text-emerald-400">Volatility & Gold Auto Engine</span>
-                    </div>
-                    <div>
-                        <button id="runBotBtn" onclick="toggleBot()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-lg shadow">
-                            <i class="fa-solid fa-play"></i> START BOT
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Real-time Market Display -->
-                <div class="bg-gray-900 p-6 rounded-xl border border-gray-700 flex flex-col items-center justify-center space-y-2">
-                    <span class="text-xs text-gray-400 uppercase tracking-widest" id="selectedMarketLabel">Live Market Price (Volatility 100)</span>
-                    <span id="livePrice" class="text-4xl font-extrabold text-amber-400 font-mono">Loading...</span>
-                </div>
+        <!-- Banner Card -->
+        <div class="bg-indigo-50/60 rounded-2xl p-4 border border-indigo-100 shadow-sm relative">
+            <div class="flex items-center justify-between border-b border-indigo-100 pb-2 mb-3">
+                <span class="font-black text-indigo-950 text-xs tracking-wider uppercase flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-rose-500 inline-block"></span> THINGS YOU NEED TO KNOW
+                </span>
+                <span class="text-xs text-indigo-300 font-medium">Speed Bot</span>
             </div>
-
-            <!-- MANUAL PANEL -->
-            <div id="manualPanel" class="hidden bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-xl">
-                <h2 class="text-xl font-bold text-amber-400 mb-4"><i class="fa-solid fa-hand-pointer"></i> Manual Trading Console</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <button onclick="executeManual('BUY')" class="bg-emerald-600 hover:bg-emerald-700 py-6 rounded-xl font-bold text-xl flex flex-col items-center">
-                        <i class="fa-solid fa-arrow-trend-up text-2xl mb-1"></i>
-                        <span>HIGHER / BUY</span>
-                    </button>
-                    <button onclick="executeManual('SELL')" class="bg-rose-600 hover:bg-rose-700 py-6 rounded-xl font-bold text-xl flex flex-col items-center">
-                        <i class="fa-solid fa-arrow-trend-down text-2xl mb-1"></i>
-                        <span>LOWER / SELL</span>
-                    </button>
+            <div class="flex items-start space-x-3">
+                <div class="text-rose-500 text-2xl pt-1">
+                    <i class="fa-solid fa-rocket"></i>
                 </div>
+                <p class="text-gray-700 text-xs font-medium leading-relaxed">
+                    Speed Bot can execute more than 10 trades on a single tick — perfect for ultra-fast digit strategies.
+                </p>
             </div>
-
-            <!-- Live Trade Logs -->
-            <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-xl">
-                <h3 class="text-md font-semibold mb-3 text-gray-300">Live Trade Log</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs text-gray-400">
-                        <thead class="bg-gray-900 text-gray-300 uppercase">
-                            <tr>
-                                <th class="p-2">Time</th>
-                                <th class="p-2">Action</th>
-                                <th class="p-2">Stake</th>
-                                <th class="p-2">Result</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tradeLogTable">
-                        </tbody>
-                    </table>
-                </div>
+            <div class="flex justify-center space-x-1.5 mt-4">
+                <span class="w-4 h-1.5 bg-rose-500 rounded-full"></span>
+                <span class="w-1.5 h-1.5 bg-indigo-200 rounded-full"></span>
+                <span class="w-1.5 h-1.5 bg-indigo-200 rounded-full"></span>
+                <span class="w-1.5 h-1.5 bg-indigo-200 rounded-full"></span>
+                <span class="w-1.5 h-1.5 bg-indigo-200 rounded-full"></span>
             </div>
-
         </div>
 
+    </main>
+
+    <!-- Floating Buttons -->
+    <div class="fixed bottom-4 right-4 flex flex-col gap-3 items-end z-30">
+        <button class="w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center shadow-lg border-2 border-cyan-400 font-bold text-xs">
+            AI
+        </button>
+        <button class="bg-red-600 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5">
+            <i class="fa-solid fa-triangle-exclamation"></i> Risk Disclaimer
+        </button>
+    </div>
+
+    <!-- LOGIN / SIGNUP MODAL -->
+    <div id="authModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <h2 id="modalTitle" class="text-xl font-bold text-indigo-950 mb-4 text-center">Log in to BinaryTools</h2>
+
+            <form onsubmit="handleAuth(event)" class="space-y-4">
+                <div id="signupNameField" class="hidden">
+                    <label class="text-xs font-semibold text-gray-600 block mb-1">Full Name</label>
+                    <input type="text" placeholder="Enter your name" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-600">
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 block mb-1">Email / Account ID</label>
+                    <input type="email" required placeholder="user@example.com" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-600">
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 block mb-1">Password</label>
+                    <input type="password" required placeholder="••••••••" class="w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:outline-none focus:border-indigo-600">
+                </div>
+
+                <button type="submit" id="modalSubmitBtn" class="w-full bg-indigo-950 text-white font-bold py-3 rounded-xl shadow hover:bg-indigo-900 transition mt-2">
+                    Log in
+                </button>
+            </form>
+
+            <p class="text-xs text-center text-gray-500 mt-4">
+                <span id="toggleModalText">Don't have an account?</span> 
+                <button onclick="toggleModalType()" class="text-indigo-600 font-bold underline ml-1" id="toggleModalBtn">Sign up</button>
+            </p>
+        </div>
     </div>
 
     <script>
-        const DERIV_APP_ID = '34zAit2vU5ON3W5mYPRHI';
-        let ws;
-        let isAutoMode = true;
-        let isBotRunning = false;
-        let currentSymbol = 'R_100';
+        let isSignup = false;
 
-        function initWebSocket() {
-            ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${DERIV_APP_ID}`);
-
-            ws.onopen = function() {
-                document.getElementById('connStatus').innerText = "Connected";
-                document.getElementById('connStatus').className = "text-emerald-400 font-bold";
-
-                const urlParams = new URLSearchParams(window.location.search);
-                const token = urlParams.get('token1');
-                if (token) {
-                    authorizeAccount(token);
-                }
-                
-                // Default Subscription
-                subscribeMarket(currentSymbol);
-            };
-
-            ws.onmessage = function(msg) {
-                const data = JSON.parse(msg.data);
-
-                if (data.msg_type === 'tick') {
-                    document.getElementById('livePrice').innerText = data.tick.quote;
-                }
-
-                if (data.msg_type === 'authorize') {
-                    document.getElementById('connStatus').innerText = "Authorized: " + data.authorize.email;
-                    document.getElementById('userBalance').innerText = "$" + data.authorize.balance;
-                }
-            };
-
-            ws.onerror = function() {
-                document.getElementById('connStatus').innerText = "Connection Error";
-                document.getElementById('connStatus').className = "text-rose-500 font-bold";
-            };
+        function openAuthModal(type) {
+            isSignup = (type === 'signup');
+            updateModalUI();
+            document.getElementById('authModal').classList.remove('hidden');
         }
 
-        function subscribeMarket(symbol) {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({ forget_all: "ticks" }));
-                ws.send(JSON.stringify({ ticks: symbol }));
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+
+        function toggleModalType() {
+            isSignup = !isSignup;
+            updateModalUI();
+        }
+
+        function updateModalUI() {
+            if(isSignup) {
+                document.getElementById('modalTitle').innerText = "Create Your Account";
+                document.getElementById('signupNameField').classList.remove('hidden');
+                document.getElementById('modalSubmitBtn').innerText = "Sign Up";
+                document.getElementById('toggleModalText').innerText = "Already have an account?";
+                document.getElementById('toggleModalBtn').innerText = "Log in";
+            } else {
+                document.getElementById('modalTitle').innerText = "Log in to BinaryTools";
+                document.getElementById('signupNameField').classList.add('hidden');
+                document.getElementById('modalSubmitBtn').innerText = "Log in";
+                document.getElementById('toggleModalText').innerText = "Don't have an account?";
+                document.getElementById('toggleModalBtn').innerText = "Sign up";
             }
         }
 
-        function changeMarket() {
-            currentSymbol = document.getElementById('marketSelect').value;
-            const marketText = document.getElementById('marketSelect').options[document.getElementById('marketSelect').selectedIndex].text;
-            document.getElementById('selectedMarketLabel').innerText = "Live Market Price (" + marketText + ")";
-            subscribeMarket(currentSymbol);
+        function handleAuth(event) {
+            event.preventDefault();
+            alert(isSignup ? "Sign Up Successful!" : "Logged in successfully!");
+            closeAuthModal();
         }
-
-        function loginDeriv() {
-            window.location.href = `https://oauth.deriv.com/oauth2/authorize?app_id=${DERIV_APP_ID}&l=EN`;
-        }
-
-        function authorizeAccount(token) {
-            ws.send(JSON.stringify({ authorize: token }));
-        }
-
-        function loginPowerDrive() {
-            alert("Power/Drive Authentication Connected!");
-        }
-
-        function switchMode() {
-            isAutoMode = !isAutoMode;
-            document.getElementById('autoBotPanel').classList.toggle('hidden', !isAutoMode);
-            document.getElementById('manualPanel').classList.toggle('hidden', isAutoMode);
-            document.getElementById('toggleModeBtn').innerHTML = isAutoMode ? 
-                '<i class="fa-solid fa-repeat"></i> Mode: Automatic' : 
-                '<i class="fa-solid fa-repeat"></i> Mode: Manual';
-        }
-
-        function loadXMLBot(event) {
-            const file = event.target.files[0];
-            if (file) {
-                document.getElementById('botName').innerText = file.name;
-                alert("Bot Strategy Loaded: " + file.name);
-            }
-        }
-
-        function toggleBot() {
-            isBotRunning = !isBotRunning;
-            const btn = document.getElementById('runBotBtn');
-            btn.className = isBotRunning ? "bg-rose-600 hover:bg-rose-700 text-white font-bold px-6 py-2 rounded-lg shadow" : "bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded-lg shadow";
-            btn.innerHTML = isBotRunning ? '<i class="fa-solid fa-square"></i> STOP BOT' : '<i class="fa-solid fa-play"></i> START BOT';
-        }
-
-        function executeManual(type) {
-            alert("Manual Trade Triggered: " + type);
-        }
-
-        window.onload = initWebSocket;
     </script>
 </body>
 </html>
