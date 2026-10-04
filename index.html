@@ -48,7 +48,7 @@
   <header>
     <div style="font-weight: bold; font-size: 16px; color: var(--accent-color);">MuskanDangerBotPro</div>
     <div class="top-actions">
-      <button class="header-btn" onclick="redirectToDerivLogin()">Log in</button>
+      <button class="header-btn" id="auth-btn" onclick="handleAuth()">Log in</button>
       <div class="balance-box" id="user-balance-display">USD 0.00</div>
     </div>
   </header>
@@ -140,34 +140,48 @@
       }
     }
 
-    // Redirects user straight to Deriv OAuth login page
-    function redirectToDerivLogin() {
+    // Direct Deriv OAuth Login redirection
+    function handleAuth() {
       const appId = '1089';
-      const redirectUrl = window.location.href.split('?')[0]; // Current GitHub Pages URL
+      const redirectUri = encodeURIComponent(window.location.href.split('#')[0].split('?')[0]);
       window.location.href = `https://oauth.deriv.com/oauth2/authorize?app_id=${appId}&l=EN&brand=deriv`;
     }
 
-    // Automatically capture token/account info when redirected back from Deriv login
+    // Capture token from URL hash returned by Deriv login
     window.onload = function() {
       const hash = window.location.hash;
-      if (hash && hash.includes('acct1')) {
+      if (hash && hash.includes('token1')) {
         const params = new URLSearchParams(hash.replace('#', '?'));
         const token = params.get('token1');
         
         if (token) {
-          // Connect using WebSocket once token is received automatically
-          const ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
-          ws.onopen = () => ws.send(JSON.stringify({ authorize: token }));
-          ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if(data.msg_type === 'authorize') {
-              document.getElementById('user-balance-display').textContent = `${data.authorize.currency} ${data.authorize.balance}`;
-              ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
-            } else if(data.msg_type === 'balance') {
-              document.getElementById('user-balance-display').textContent = `${data.balance.currency} ${data.balance.balance}`;
-            }
-          };
+          localStorage.setItem('deriv_token', token);
+          window.location.hash = ''; // Clear hash from URL
         }
+      }
+
+      const savedToken = localStorage.getItem('deriv_token');
+      if (savedToken) {
+        document.getElementById('auth-btn').textContent = 'Connected';
+        document.getElementById('auth-btn').style.background = '#22c55e';
+        
+        // Connect via WebSocket to fetch balance and live details
+        const ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
+        ws.onopen = () => {
+          ws.send(JSON.stringify({ authorize: savedToken }));
+        };
+        ws.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          if (data.msg_type === 'authorize') {
+            document.getElementById('user-balance-display').textContent = `${data.authorize.currency} ${data.authorize.balance}`;
+            ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
+          } else if (data.msg_type === 'balance') {
+            document.getElementById('user-balance-display').textContent = `${data.balance.currency} ${data.balance.balance}`;
+          } else if (data.error) {
+            localStorage.removeItem('deriv_token');
+            document.getElementById('auth-btn').textContent = 'Log in';
+          }
+        };
       }
     };
   </script>
