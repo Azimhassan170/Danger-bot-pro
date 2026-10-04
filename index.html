@@ -3,92 +3,154 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BinaryTools Trading Platform</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>MuskanDangerBotPro - BinaryTools</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .container { background: #1e293b; padding: 24px; border-radius: 12px; width: 100%; max-width: 420px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; }
+    h2 { margin-bottom: 8px; color: #38bdf8; }
+    p { color: #94a3b8; font-size: 14px; margin-bottom: 20px; }
+    .input-group { margin-bottom: 16px; text-align: left; }
+    label { display: block; font-size: 12px; color: #cbd5e1; margin-bottom: 6px; font-weight: bold; }
+    input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 14px; outline: none; }
+    input:focus { border-color: #38bdf8; }
+    button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; }
+    .btn-connect { background: #6366f1; color: white; margin-bottom: 12px; }
+    .btn-connect:hover { background: #4f46e5; }
+    .btn-logout { background: #ef4444; color: white; display: none; margin-top: 10px; }
+    .status { margin-top: 16px; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: bold; display: none; }
+    .status.success { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #22c55e; }
+    .status.error { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+    .status.info { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; }
+    .user-info { margin-top: 15px; background: #0f172a; padding: 12px; border-radius: 8px; text-align: left; display: none; }
+    .user-info p { margin-bottom: 4px; font-size: 13px; color: #cbd5e1; }
+  </style>
 </head>
-<body class="bg-slate-950 text-white min-h-screen">
+<body>
 
-  <header class="flex justify-between items-center p-4 border-b border-slate-800">
-    <h1 class="text-xl font-bold">BinaryTools</h1>
-    <button id="mainLoginBtn" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg font-semibold transition">
-      Log In / Connect API
-    </button>
-  </header>
+  <div class="container">
+    <h2>MuskanDangerBotPro</h2>
+    <p>Enter your Deriv API Token to connect your account.</p>
 
-  <div id="authModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-50">
-    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-md w-full shadow-2xl">
-      <h2 class="text-xl font-bold mb-4 text-center">Connect Your Account</h2>
-      <p class="text-slate-400 text-sm mb-6 text-center">Enter your Deriv API Token or log in via Deriv OAuth.</p>
-      
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-medium text-slate-400 mb-1">API TOKEN</label>
-          <input type="text" id="apiTokenInput" placeholder="e.g. w1A2b3C4d5E6f7G" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 text-white">
-        </div>
-        <button id="saveTokenBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-lg font-semibold transition">
-          Connect Token
-        </button>
-        <div class="text-center text-xs text-slate-500 my-2">OR</div>
-        <button id="derivOauthBtn" class="w-full bg-slate-800 hover:bg-slate-700 py-3 rounded-lg font-semibold transition text-center block">
-          Log in with Deriv OAuth
-        </button>
+    <div id="auth-box">
+      <div class="input-group">
+        <label for="api-token">API TOKEN</label>
+        <input type="text" id="api-token" placeholder="Paste your API Token here...">
       </div>
-      
-      <button id="closeModalBtn" class="mt-4 text-xs text-slate-500 hover:text-white w-full text-center">Close</button>
+      <button class="btn-connect" id="connect-btn">Connect Token</button>
+    </div>
+
+    <div class="status" id="status-msg"></div>
+
+    <div class="user-info" id="user-info">
+      <p><strong>Account:</strong> <span id="user-loginid">-</span></p>
+      <p><strong>Balance:</strong> <span id="user-balance">-</span></p>
+      <p><strong>Currency:</strong> <span id="user-currency">-</span></p>
+      <button class="btn-logout" id="logout-btn">Disconnect Account</button>
     </div>
   </div>
 
   <script>
-    const DERIV_APP_ID = '103001'; 
+    const APP_ID = 1089; // Standard Deriv App ID for Token auth
+    const WS_URL = `wss://ws.derivws.com/websockets/v3?app_id=${APP_ID}`;
+    
+    let ws = null;
 
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(registrations => {
-        for (let registration of registrations) registration.unregister();
-      });
+    const tokenInput = document.getElementById('api-token');
+    const connectBtn = document.getElementById('connect-btn');
+    const statusMsg = document.getElementById('status-msg');
+    const authBox = document.getElementById('auth-box');
+    const userInfo = document.getElementById('user-info');
+    const userLoginid = document.getElementById('user-loginid');
+    const userBalance = document.getElementById('user-balance');
+    const userCurrency = document.getElementById('user-currency');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    function showStatus(msg, type) {
+      statusMsg.textContent = msg;
+      statusMsg.className = `status ${type}`;
+      statusMsg.style.display = 'block';
     }
 
-    const modal = document.getElementById('authModal');
-    const loginBtn = document.getElementById('mainLoginBtn');
-    const closeBtn = document.getElementById('closeModalBtn');
-    const saveTokenBtn = document.getElementById('saveTokenBtn');
-    const oauthBtn = document.getElementById('derivOauthBtn');
+    function initConnection(token) {
+      showStatus('Connecting to Deriv WebSocket...', 'info');
 
-    loginBtn.addEventListener('click', () => {
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    });
+      ws = new WebSocket(WS_URL);
 
-    closeBtn.addEventListener('click', () => {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    });
+      ws.onopen = () => {
+        showStatus('Authenticating Token...', 'info');
+        ws.send(JSON.stringify({ authorize: token }));
+      };
 
-    oauthBtn.addEventListener('click', () => {
-      const redirectUrl = window.location.origin + window.location.pathname;
-      const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${DERIV_APP_ID}&redirect_uri=${encodeURIComponent(redirectUrl)}`;
-      window.location.href = oauthUrl;
-    });
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
 
-    saveTokenBtn.addEventListener('click', () => {
-      const token = document.getElementById('apiTokenInput').value.trim();
-      if (token) {
-        localStorage.setItem('deriv_api_token', token);
-        const ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${DERIV_APP_ID}`);
-        ws.onopen = () => ws.send(JSON.stringify({ authorize: token }));
-        ws.onmessage = (msg) => {
-          const data = JSON.parse(msg.data);
-          if (data.msg_type === 'authorize') {
-            alert('Connected Successfully: ' + data.authorize.email);
-            modal.classList.add('hidden');
-            location.reload();
-          } else if (data.error) {
-            alert('Error: ' + data.error.message);
+        if (data.error) {
+          showStatus(`Error: ${data.error.message}`, 'error');
+          localStorage.removeItem('deriv_token');
+          return;
+        }
+
+        if (data.msg_type === 'authorize') {
+          showStatus('Successfully Connected!', 'success');
+          localStorage.setItem('deriv_token', token);
+          
+          // Display user information
+          authBox.style.display = 'none';
+          userInfo.style.display = 'block';
+          logoutBtn.style.display = 'block';
+
+          userLoginid.textContent = data.authorize.loginid;
+          userBalance.textContent = `${data.authorize.balance} ${data.authorize.currency}`;
+          userCurrency.textContent = data.authorize.currency;
+
+          // Request balance updates
+          ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
+        }
+
+        if (data.msg_type === 'balance') {
+          if (data.balance) {
+            userBalance.textContent = `${data.balance.balance} ${data.balance.currency}`;
           }
-        };
-      } else {
-        alert('Please enter a valid token');
+        }
+      };
+
+      ws.onerror = (err) => {
+        showStatus('WebSocket Connection Error', 'error');
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket Connection Closed');
+      };
+    }
+
+    connectBtn.addEventListener('click', () => {
+      const token = tokenInput.value.trim();
+      if (!token) {
+        showStatus('Please enter a valid API Token!', 'error');
+        return;
+      }
+      initConnection(token);
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('deriv_token');
+      if (ws) ws.close();
+      authBox.style.display = 'block';
+      userInfo.style.display = 'none';
+      statusMsg.style.display = 'none';
+      tokenInput.value = '';
+    });
+
+    // Auto-connect if token exists in LocalStorage
+    window.addEventListener('load', () => {
+      const savedToken = localStorage.getItem('deriv_token');
+      if (savedToken) {
+        tokenInput.value = savedToken;
+        initConnection(savedToken);
       }
     });
   </script>
+
 </body>
 </html>
