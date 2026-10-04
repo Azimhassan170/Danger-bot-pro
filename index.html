@@ -3,154 +3,195 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MuskanDangerBotPro - BinaryTools</title>
+  <title>MuskanDangerBotPro - Trading Workspace</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
-    body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-    .container { background: #1e293b; padding: 24px; border-radius: 12px; width: 100%; max-width: 420px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; }
-    h2 { margin-bottom: 8px; color: #38bdf8; }
-    p { color: #94a3b8; font-size: 14px; margin-bottom: 20px; }
-    .input-group { margin-bottom: 16px; text-align: left; }
-    label { display: block; font-size: 12px; color: #cbd5e1; margin-bottom: 6px; font-weight: bold; }
-    input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 14px; outline: none; }
-    input:focus { border-color: #38bdf8; }
-    button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; }
-    .btn-login { background: #2563eb; color: white; margin-bottom: 12px; }
-    .btn-login:hover { background: #1d4ed8; }
-    .btn-logout { background: #ef4444; color: white; display: none; margin-top: 10px; }
-    .status { margin-top: 16px; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: bold; display: none; }
-    .status.success { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #22c55e; }
-    .status.error { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
-    .status.info { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; }
-    .user-info { margin-top: 15px; background: #0f172a; padding: 12px; border-radius: 8px; text-align: left; display: none; }
-    .user-info p { margin-bottom: 4px; font-size: 13px; color: #cbd5e1; }
+    :root {
+      -bg-color: #0b132b;
+      -panel-bg: #1c2541;
+      -border-color: #3a506b;
+      -accent-color: #4ea8de;
+      -text-main: #ffffff;
+      -text-muted: #8d99ae;
+      -success: #2ec4b6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(-bg-color); color: var(-text-main); min-height: 100vh; display: flex; flex-direction: column; }
+    
+    /* Top Navigation bar */
+    header { background: #080c1f; border-bottom: 1px solid var(-border-color); display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; overflow-x: auto; white-space: nowrap; }
+    .nav-tabs { display: flex; gap: 10px; align-items: center; }
+    .tab-btn { background: transparent; border: none; color: var(-text-muted); padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: 0.2s; }
+    .tab-btn:hover, .tab-btn.active { background: var(-accent-color); color: #fff; }
+    
+    .user-profile { display: flex; align-items: center; gap: 15px; font-size: 14px; }
+    .balance-box { background: var(-panel-bg); padding: 6px 12px; border-radius: 6px; border: 1px solid var(-border-color); font-weight: bold; color: var(-success); }
+
+    /* Main Content Area */
+    .main-content { flex: 1; padding: 20px; overflow-y: auto; }
+    .section-view { display: none; }
+    .section-view.active { display: block; }
+
+    /* Cards & Grids */
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .card { background: var(-panel-bg); border: 1px solid var(-border-color); border-radius: 10px; padding: 20px; cursor: pointer; transition: 0.2s; }
+    .card:hover { border-color: var(-accent-color); transform: translateY(-2px); }
+    .card h3 { font-size: 16px; margin-bottom: 8px; color: var(-accent-color); }
+    .card p { font-size: 12px; color: var(-text-muted); }
+
+    /* Authentication Modal/Box */
+    .auth-container { max-width: 400px; margin: 50px auto; background: var(-panel-bg); padding: 25px; border-radius: 12px; border: 1px solid var(-border-color); text-align: center; }
+    .auth-container input { width: 100%; padding: 12px; margin: 15px 0; background: var(-bg-color); border: 1px solid var(-border-color); color: #fff; border-radius: 6px; outline: none; }
+    .auth-container button { width: 100%; padding: 12px; background: var(-accent-color); border: none; color: #fff; font-weight: bold; border-radius: 6px; cursor: pointer; }
+
+    /* Footer Execution Bar */
+    footer { background: #080c1f; border-top: 1px solid var(-border-color); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+    .run-btn { background: #22c55e; color: #fff; border: none; padding: 8px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h2>MuskanDangerBotPro</h2>
-    <p>Login with Personal Access Token (PAT)</p>
+  <!-- Header Navigation -->
+  <header>
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+      <button class="tab-btn" onclick="switchTab('bot-builder')">Bot Builder</button>
+      <button class="tab-btn" onclick="switchTab('free-bots')">Free Bots</button>
+      <button class="tab-btn" onclick="switchTab('hedging')">Hedging Tool</button>
+      <button class="tab-btn" onclick="switchTab('ai-signal')">AI Signal</button>
+      <button class="tab-btn" onclick="switchTab('neurapulse')">NeuraPulse AI</button>
+      <button class="tab-btn" onclick="switchTab('quick-bot')">Quick Bot</button>
+      <button class="tab-btn" onclick="switchTab('auto-trader')">Auto Trader</button>
+    </div>
+    <div class="user-profile">
+      <div class="balance-box" id="user-balance-display">USD 0.00</div>
+    </div>
+  </header>
 
-    <div id="auth-box">
-      <div class="input-group">
-        <label for="api-token">Personal Access Token</label>
-        <input type="password" id="api-token" placeholder="Enter your token...">
+  <!-- Main Content -->
+  <div class="main-content">
+
+    <!-- DASHBOARD VIEW -->
+    <div id="dashboard" class="section-view active">
+      <div id="login-section" class="auth-container">
+        <h2>MuskanDangerBotPro Login</h2>
+        <p style="color:var(-text-muted); font-size:12px; margin-top:5px;">Enter your Deriv Personal Access Token (PAT)</p>
+        <input type="password" id="api-token" placeholder="Personal Access Token...">
+        <button onclick="loginDeriv()">Connect & Authorize</button>
       </div>
-      <button class="btn-login" id="login-btn">Login</button>
+
+      <div id="dashboard-content" style="display:none;">
+        <h2 style="margin-bottom: 15px;">Good evening, Master Trader</h2>
+        <p style="color: var(-text-muted); margin-bottom: 25px;">"Discipline beats intelligence in the long run."</p>
+        
+        <div class="grid-4">
+          <div class="card" onclick="switchTab('free-bots')">
+            <h3>👑 Premium Bots</h3>
+            <p>Explore elite automated trading strategies.</p>
+          </div>
+          <div class="card" onclick="switchTab('bot-builder')">
+            <h3>📤 Upload Bot</h3>
+            <p>Import XML bot configuration file.</p>
+          </div>
+          <div class="card" onclick="switchTab('free-bots')">
+            <h3>🤖 Free Bots</h3>
+            <p>Browse ready-made trading strategies.</p>
+          </div>
+          <div class="card" onclick="switchTab('quick-bot')">
+            <h3>⚡ Quick Bot Builder</h3>
+            <p>Create a bot with custom trade and risk settings.</p>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="status" id="status-msg"></div>
-
-    <div class="user-info" id="user-info">
-      <p><strong>Account ID:</strong> <span id="user-loginid">-</span></p>
-      <p><strong>Balance:</strong> <span id="user-balance">-</span></p>
-      <p><strong>Currency:</strong> <span id="user-currency">-</span></p>
-      <button class="btn-logout" id="logout-btn">Logout</button>
+    <!-- BOT BUILDER VIEW -->
+    <div id="bot-builder" class="section-view">
+      <h2>Bot Builder Workspace</h2>
+      <p style="color:var(-text-muted); margin-top:10px;">Configure trade parameters, purchase conditions, and sell rules visually.</p>
     </div>
+
+    <!-- FREE BOTS VIEW -->
+    <div id="free-bots" class="section-view">
+      <h2>Free & Smart Bots Library</h2>
+      <div class="grid-4" style="margin-top:20px;">
+        <div class="card"><h3>Binary Matrix AI</h3><p>Advanced automated digit trading bot.</p><button style="margin-top:10px; width:100%; background:var(-accent-color); border:none; padding:6px; color:#fff; border-radius:4px;">Load Bot</button></div>
+        <div class="card"><h3>Digit Pro V1</h3><p>Smart recovery system for digits.</p><button style="margin-top:10px; width:100%; background:var(-accent-color); border:none; padding:6px; color:#fff; border-radius:4px;">Load Bot</button></div>
+        <div class="card"><h3>Entry Scanner Bot</h3><p>Scans entry ticks with precision confirmation.</p><button style="margin-top:10px; width:100%; background:var(-accent-color); border:none; padding:6px; color:#fff; border-radius:4px;">Load Bot</button></div>
+        <div class="card"><h3>Over/Under Virtual Hook</h3><p>Automate your trades with efficient hooks.</p><button style="margin-top:10px; width:100%; background:var(-accent-color); border:none; padding:6px; color:#fff; border-radius:4px;">Load Bot</button></div>
+      </div>
+    </div>
+
+    <!-- HEDGING TOOL VIEW -->
+    <div id="hedging" class="section-view">
+      <h2>Hedging Tool</h2>
+      <p style="color:var(-text-muted); margin-top:10px;">Manage multi-market risk and execute balanced hedges automatically.</p>
+    </div>
+
+    <!-- AI SIGNAL VIEW -->
+    <div id="ai-signal" class="section-view">
+      <h2>AI Signal Scanner</h2>
+      <p style="color:var(-text-muted); margin-top:10px;">Live market synchronization for Over/Under, Even/Odd and Rise/Fall.</p>
+    </div>
+
+    <!-- NEURAPULSE AI VIEW -->
+    <div id="neurapulse" class="section-view">
+      <h2>NeuraPulse AI Matrix</h2>
+      <p style="color:var(-text-muted); margin-top:10px;">Next-gen neural network automated parameters and take-profit controls.</p>
+    </div>
+
+    <!-- QUICK BOT VIEW -->
+    <div id="quick-bot" class="section-view">
+      <h2>Quick Bot Parameters</h2>
+      <p style="color:var(-text-muted); margin-top:10px;">Fast stake, Martingale, and automatic stop-loss configuration.</p>
+    </div>
+
+    <!-- AUTO TRADER VIEW -->
+    <div id="auto-trader" class="section-view">
+      <h2>Auto Trader Cards</h2>
+      <p style="color:var(-text-muted); margin-top:10px;">Run multi-card strategies simultaneously with real-time analytics.</p>
+    </div>
+
   </div>
 
+  <!-- Footer status bar -->
+  <footer>
+    <div>Execution Mode: <span style="color:var(-accent-color); font-weight:bold;">FAST</span></div>
+    <button class="run-btn" id="run-status-btn">Bot is not running</button>
+  </footer>
+
   <script>
-    const APP_ID = 1089;
-    const WS_URL = `wss://ws.derivws.com/websockets/v3?app_id=${APP_ID}`;
-    let ws = null;
-
-    const tokenInput = document.getElementById('api-token');
-    const loginBtn = document.getElementById('login-btn');
-    const statusMsg = document.getElementById('status-msg');
-    const authBox = document.getElementById('auth-box');
-    const userInfo = document.getElementById('user-info');
-    const userLoginid = document.getElementById('user-loginid');
-    const userBalance = document.getElementById('user-balance');
-    const userCurrency = document.getElementById('user-currency');
-    const logoutBtn = document.getElementById('logout-btn');
-
-    function showStatus(msg, type) {
-      statusMsg.textContent = msg;
-      statusMsg.className = `status ${type}`;
-      statusMsg.style.display = 'block';
+    function switchTab(tabId) {
+      document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
     }
 
-    function authenticateToken(token) {
-      showStatus('Authorizing with personal access token...', 'info');
-
-      if (ws) ws.close();
-
-      try {
-        ws = new WebSocket(WS_URL);
-      } catch (err) {
-        showStatus('Failed to connect to server.', 'error');
+    function loginDeriv() {
+      const token = document.getElementById('api-token').value.trim();
+      if(!token) {
+        alert('Please enter your Personal Access Token');
         return;
       }
-
-      ws.onopen = () => {
-        // Send authorize request using the token format
-        ws.send(JSON.stringify({ authorize: token }));
-      };
-
+      
+      const ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
+      ws.onopen = () => { ws.send(JSON.stringify({ authorize: token })); };
       ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-
-          if (data.error) {
-            showStatus(data.error.message, 'error');
-            localStorage.removeItem('deriv_pat');
-            return;
-          }
-
-          if (data.msg_type === 'authorize') {
-            showStatus('Successfully authorized!', 'success');
-            localStorage.setItem('deriv_pat', token);
-
-            authBox.style.display = 'none';
-            userInfo.style.display = 'block';
-
-            userLoginid.textContent = data.authorize.loginid;
-            userBalance.textContent = `${data.authorize.balance} ${data.authorize.currency}`;
-            userCurrency.textContent = data.authorize.currency;
-
-            // Subscribe to live balance updates
-            ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
-          }
-
-          if (data.msg_type === 'balance' && data.balance) {
-            userBalance.textContent = `${data.balance.balance} ${data.balance.currency}`;
-          }
-        } catch (e) {
-          console.error(e);
+        const data = JSON.parse(event.data);
+        if(data.error) {
+          alert(data.error.message);
+        } else if(data.msg_type === 'authorize') {
+          document.getElementById('login-section').style.display = 'none';
+          document.getElementById('dashboard-content').style.display = 'block';
+          document.getElementById('user-balance-display').textContent = `${data.authorize.currency} ${data.authorize.balance}`;
+          ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
+        } else if(data.msg_type === 'balance') {
+          document.getElementById('user-balance-display').textContent = `${data.balance.currency} ${data.balance.balance}`;
         }
       };
-
-      ws.onerror = () => {
-        showStatus('Failed to fetch accounts: Connection error', 'error');
-      };
+      ws.onerror = () => { alert('Connection error with Deriv API.'); };
     }
-
-    loginBtn.addEventListener('click', () => {
-      const token = tokenInput.value.trim();
-      if (!token) {
-        showStatus('Please enter your Personal Access Token.', 'error');
-        return;
-      }
-      authenticateToken(token);
-    });
-
-    logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('deriv_pat');
-      if (ws) ws.close();
-      authBox.style.display = 'block';
-      userInfo.style.display = 'none';
-      statusMsg.style.display = 'none';
-      tokenInput.value = '';
-    });
-
-    window.addEventListener('load', () => {
-      const savedToken = localStorage.getItem('deriv_pat');
-      if (savedToken) {
-        tokenInput.value = savedToken;
-        authenticateToken(savedToken);
-      }
-    });
   </script>
 
 </body>
