@@ -39,10 +39,8 @@
   </div>
 
   <script>
-    // Registered Deriv App ID
     const DERIV_APP_ID = '103001'; 
 
-    // Service Worker Clear
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(registrations => {
         for (let registration of registrations) registration.unregister();
@@ -65,14 +63,12 @@
       modal.classList.remove('flex');
     });
 
-    // OAuth Redirect Handler
     oauthBtn.addEventListener('click', () => {
-      const redirectUrl = encodeURIComponent(window.location.origin + window.location.pathname);
-      const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${DERIV_APP_ID}&redirect_uri=${redirectUrl}`;
+      const redirectUrl = window.location.origin + window.location.pathname;
+      const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${DERIV_APP_ID}&redirect_uri=${encodeURIComponent(redirectUrl)}`;
       window.location.href = oauthUrl;
     });
 
-    // API Token WebSocket Connect
     saveTokenBtn.addEventListener('click', () => {
       const token = document.getElementById('apiTokenInput').value.trim();
       if (token) {
