@@ -15,8 +15,8 @@
     input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 14px; outline: none; }
     input:focus { border-color: #38bdf8; }
     button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; }
-    .btn-connect { background: #6366f1; color: white; margin-bottom: 12px; }
-    .btn-connect:hover { background: #4f46e5; }
+    .btn-login { background: #2563eb; color: white; margin-bottom: 12px; }
+    .btn-login:hover { background: #1d4ed8; }
     .btn-logout { background: #ef4444; color: white; display: none; margin-top: 10px; }
     .status { margin-top: 16px; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: bold; display: none; }
     .status.success { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #22c55e; }
@@ -30,14 +30,14 @@
 
   <div class="container">
     <h2>MuskanDangerBotPro</h2>
-    <p>Enter your Deriv API Token to connect your account.</p>
+    <p>Login with Personal Access Token (PAT)</p>
 
     <div id="auth-box">
       <div class="input-group">
-        <label for="api-token">API TOKEN</label>
-        <input type="text" id="api-token" placeholder="Paste your API Token here...">
+        <label for="api-token">Personal Access Token</label>
+        <input type="password" id="api-token" placeholder="Enter your token...">
       </div>
-      <button class="btn-connect" id="connect-btn">Connect Token</button>
+      <button class="btn-login" id="login-btn">Login</button>
     </div>
 
     <div class="status" id="status-msg"></div>
@@ -46,26 +46,17 @@
       <p><strong>Account ID:</strong> <span id="user-loginid">-</span></p>
       <p><strong>Balance:</strong> <span id="user-balance">-</span></p>
       <p><strong>Currency:</strong> <span id="user-currency">-</span></p>
-      <button class="btn-logout" id="logout-btn">Disconnect Account</button>
+      <button class="btn-logout" id="logout-btn">Logout</button>
     </div>
   </div>
 
   <script>
     const APP_ID = 1089;
-    
-    // Multiple official servers list for failproof connection
-    const SERVERS = [
-      `wss://ws.deriv.com/websockets/v3?app_id=${APP_ID}`,
-      `wss://ws.derivws.com/websockets/v3?app_id=${APP_ID}`,
-      `wss://green.derivws.com/websockets/v3?app_id=${APP_ID}`,
-      `wss://blue.derivws.com/websockets/v3?app_id=${APP_ID}`
-    ];
-
+    const WS_URL = `wss://ws.derivws.com/websockets/v3?app_id=${APP_ID}`;
     let ws = null;
-    let serverIndex = 0;
 
     const tokenInput = document.getElementById('api-token');
-    const connectBtn = document.getElementById('connect-btn');
+    const loginBtn = document.getElementById('login-btn');
     const statusMsg = document.getElementById('status-msg');
     const authBox = document.getElementById('auth-box');
     const userInfo = document.getElementById('user-info');
@@ -80,90 +71,72 @@
       statusMsg.style.display = 'block';
     }
 
-    function initConnection(token) {
-      showStatus('Connecting to Deriv Servers...', 'info');
+    function authenticateToken(token) {
+      showStatus('Authorizing with personal access token...', 'info');
 
-      if (ws) {
-        ws.close();
-      }
+      if (ws) ws.close();
 
-      connectToServer(token);
-    }
-
-    function connectToServer(token) {
-      if (serverIndex >= SERVERS.length) {
-        showStatus('Connection Error. All servers blocked or offline.', 'error');
-        serverIndex = 0;
-        return;
-      }
-
-      const currentUrl = SERVERS[serverIndex];
       try {
-        ws = new WebSocket(currentUrl);
-      } catch (e) {
-        serverIndex++;
-        connectToServer(token);
+        ws = new WebSocket(WS_URL);
+      } catch (err) {
+        showStatus('Failed to connect to server.', 'error');
         return;
       }
 
       ws.onopen = () => {
-        showStatus('Authenticating Token...', 'info');
+        // Send authorize request using the token format
         ws.send(JSON.stringify({ authorize: token }));
       };
 
       ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
+        try {
+          const data = JSON.parse(event.data);
 
-        if (data.error) {
-          showStatus(`Error: ${data.error.message}`, 'error');
-          localStorage.removeItem('deriv_token');
-          return;
-        }
+          if (data.error) {
+            showStatus(data.error.message, 'error');
+            localStorage.removeItem('deriv_pat');
+            return;
+          }
 
-        if (data.msg_type === 'authorize') {
-          showStatus('Successfully Connected!', 'success');
-          localStorage.setItem('deriv_token', token);
+          if (data.msg_type === 'authorize') {
+            showStatus('Successfully authorized!', 'success');
+            localStorage.setItem('deriv_pat', token);
 
-          authBox.style.display = 'none';
-          userInfo.style.display = 'block';
+            authBox.style.display = 'none';
+            userInfo.style.display = 'block';
 
-          userLoginid.textContent = data.authorize.loginid;
-          userBalance.textContent = `${data.authorize.balance} ${data.authorize.currency}`;
-          userCurrency.textContent = data.authorize.currency;
+            userLoginid.textContent = data.authorize.loginid;
+            userBalance.textContent = `${data.authorize.balance} ${data.authorize.currency}`;
+            userCurrency.textContent = data.authorize.currency;
 
-          ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
-        }
+            // Subscribe to live balance updates
+            ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
+          }
 
-        if (data.msg_type === 'balance') {
-          if (data.balance) {
+          if (data.msg_type === 'balance' && data.balance) {
             userBalance.textContent = `${data.balance.balance} ${data.balance.currency}`;
           }
+        } catch (e) {
+          console.error(e);
         }
       };
 
       ws.onerror = () => {
-        // Try next server in the list automatically
-        serverIndex++;
-        connectToServer(token);
-      };
-
-      ws.onclose = () => {
-        console.log('WebSocket closed');
+        showStatus('Failed to fetch accounts: Connection error', 'error');
       };
     }
 
-    connectBtn.addEventListener('click', () => {
+    loginBtn.addEventListener('click', () => {
       const token = tokenInput.value.trim();
       if (!token) {
-        showStatus('Please enter a valid API Token!', 'error');
+        showStatus('Please enter your Personal Access Token.', 'error');
         return;
       }
-      serverIndex = 0;
-      initConnection(token);
+      authenticateToken(token);
     });
 
     logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('deriv_token');
+      localStorage.removeItem('deriv_pat');
       if (ws) ws.close();
       authBox.style.display = 'block';
       userInfo.style.display = 'none';
@@ -172,10 +145,10 @@
     });
 
     window.addEventListener('load', () => {
-      const savedToken = localStorage.getItem('deriv_token');
+      const savedToken = localStorage.getItem('deriv_pat');
       if (savedToken) {
         tokenInput.value = savedToken;
-        initConnection(savedToken);
+        authenticateToken(savedToken);
       }
     });
   </script>
