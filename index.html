@@ -93,13 +93,43 @@
 
     <!-- JavaScript Logic -->
     <script>
+        // Deriv App ID
+        var appId = '34zYQuSclB38QunN2PDPq';
+
+        // Check OAuth redirect token on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token1 = urlParams.get('token1');
+            const acct1 = urlParams.get('acct1');
+
+            if (token1) {
+                localStorage.setItem('deriv_token', token1);
+                localStorage.setItem('deriv_acct', acct1);
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            checkLoginStatus();
+        });
+
+        function checkLoginStatus() {
+            const token = localStorage.getItem('deriv_token');
+            const acct = localStorage.getItem('deriv_acct');
+            if (token && acct) {
+                document.getElementById('loggedOutNav').classList.add('hidden');
+                document.getElementById('loggedInNav').classList.remove('hidden');
+                document.getElementById('userAccountId').innerText = acct;
+            }
+        }
+
         // Deriv OAuth Login Logic
         function loginWithDeriv() {
-            var appId = '66832'; // Apni Deriv App ID yahan enter karein
             window.location.href = 'https://oauth.deriv.com/oauth2/authorize?app_id=' + appId + '&l=EN&brand=deriv';
         }
 
+        // Logout Logic
         function logoutDeriv() {
+            localStorage.removeItem('deriv_token');
+            localStorage.removeItem('deriv_acct');
             document.getElementById('loggedInNav').classList.add('hidden');
             document.getElementById('loggedOutNav').classList.remove('hidden');
         }
