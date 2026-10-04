@@ -31,7 +31,7 @@
           Connect Token
         </button>
         <div class="text-center text-xs text-slate-500 my-2">OR</div>
-        <a href="https://oauth.deriv.com/oauth2/authorize?app_id=1089" class="block w-full text-center bg-slate-800 hover:bg-slate-700 py-3 rounded-lg font-semibold transition">
+        <a href="https://oauth.deriv.com/oauth2/authorize?app_id=1089&l=EN" target="_blank" class="block w-full text-center bg-slate-800 hover:bg-slate-700 py-3 rounded-lg font-semibold transition">
           Log in with Deriv OAuth
         </a>
       </div>
@@ -66,13 +66,27 @@
       modal.classList.remove('flex');
     });
 
+    // 3. Connect API Token via WebSocket
     saveTokenBtn.addEventListener('click', () => {
       const token = document.getElementById('apiTokenInput').value.trim();
       if (token) {
         localStorage.setItem('deriv_api_token', token);
-        alert('API Token Saved Successfully!');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+        
+        const ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
+        ws.onopen = () => {
+          ws.send(JSON.stringify({ authorize: token }));
+        };
+        ws.onmessage = (msg) => {
+          const data = JSON.parse(msg.data);
+          if (data.msg_type === 'authorize') {
+            alert('Connected Successfully as: ' + data.authorize.email);
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            location.reload();
+          } else if (data.error) {
+            alert('Invalid Token: ' + data.error.message);
+          }
+        };
       } else {
         alert('Please enter a valid token');
       }
