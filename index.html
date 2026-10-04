@@ -43,7 +43,7 @@
     <div class="status" id="status-msg"></div>
 
     <div class="user-info" id="user-info">
-      <p><strong>Account:</strong> <span id="user-loginid">-</span></p>
+      <p><strong>Account ID:</strong> <span id="user-loginid">-</span></p>
       <p><strong>Balance:</strong> <span id="user-balance">-</span></p>
       <p><strong>Currency:</strong> <span id="user-currency">-</span></p>
       <button class="btn-logout" id="logout-btn">Disconnect Account</button>
@@ -51,7 +51,8 @@
   </div>
 
   <script>
-    const APP_ID = 1089; // Standard Deriv App ID for Token auth
+    // Valid public Deriv WebSocket App ID
+    const APP_ID = 36300; 
     const WS_URL = `wss://ws.derivws.com/websockets/v3?app_id=${APP_ID}`;
     
     let ws = null;
@@ -73,7 +74,11 @@
     }
 
     function initConnection(token) {
-      showStatus('Connecting to Deriv WebSocket...', 'info');
+      showStatus('Connecting to Deriv Server...', 'info');
+
+      if (ws) {
+        ws.close();
+      }
 
       ws = new WebSocket(WS_URL);
 
@@ -95,16 +100,14 @@
           showStatus('Successfully Connected!', 'success');
           localStorage.setItem('deriv_token', token);
           
-          // Display user information
           authBox.style.display = 'none';
           userInfo.style.display = 'block';
-          logoutBtn.style.display = 'block';
 
           userLoginid.textContent = data.authorize.loginid;
           userBalance.textContent = `${data.authorize.balance} ${data.authorize.currency}`;
           userCurrency.textContent = data.authorize.currency;
 
-          // Request balance updates
+          // Request live balance subscription
           ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
         }
 
@@ -116,7 +119,7 @@
       };
 
       ws.onerror = (err) => {
-        showStatus('WebSocket Connection Error', 'error');
+        showStatus('WebSocket Connection Error. Check Network or Token.', 'error');
       };
 
       ws.onclose = () => {
@@ -142,7 +145,7 @@
       tokenInput.value = '';
     });
 
-    // Auto-connect if token exists in LocalStorage
+    // Auto connect on page refresh if token saved
     window.addEventListener('load', () => {
       const savedToken = localStorage.getItem('deriv_token');
       if (savedToken) {
