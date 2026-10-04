@@ -51,11 +51,18 @@
   </div>
 
   <script>
-    // Official Deriv WebSocket Endpoint
     const APP_ID = 1089;
-    const WS_URL = `wss://ws.deriv.com/websockets/v3?app_id=${APP_ID}`;
+    
+    // Multiple official servers list for failproof connection
+    const SERVERS = [
+      `wss://ws.deriv.com/websockets/v3?app_id=${APP_ID}`,
+      `wss://ws.derivws.com/websockets/v3?app_id=${APP_ID}`,
+      `wss://green.derivws.com/websockets/v3?app_id=${APP_ID}`,
+      `wss://blue.derivws.com/websockets/v3?app_id=${APP_ID}`
+    ];
 
     let ws = null;
+    let serverIndex = 0;
 
     const tokenInput = document.getElementById('api-token');
     const connectBtn = document.getElementById('connect-btn');
@@ -74,16 +81,28 @@
     }
 
     function initConnection(token) {
-      showStatus('Connecting to Server...', 'info');
+      showStatus('Connecting to Deriv Servers...', 'info');
 
       if (ws) {
         ws.close();
       }
 
+      connectToServer(token);
+    }
+
+    function connectToServer(token) {
+      if (serverIndex >= SERVERS.length) {
+        showStatus('Connection Error. All servers blocked or offline.', 'error');
+        serverIndex = 0;
+        return;
+      }
+
+      const currentUrl = SERVERS[serverIndex];
       try {
-        ws = new WebSocket(WS_URL);
-      } catch (err) {
-        showStatus('WebSocket initialization failed.', 'error');
+        ws = new WebSocket(currentUrl);
+      } catch (e) {
+        serverIndex++;
+        connectToServer(token);
         return;
       }
 
@@ -112,7 +131,6 @@
           userBalance.textContent = `${data.authorize.balance} ${data.authorize.currency}`;
           userCurrency.textContent = data.authorize.currency;
 
-          // Request live balance updates
           ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
         }
 
@@ -124,11 +142,13 @@
       };
 
       ws.onerror = () => {
-        showStatus('Connection Error. Check Network.', 'error');
+        // Try next server in the list automatically
+        serverIndex++;
+        connectToServer(token);
       };
 
       ws.onclose = () => {
-        console.log('Connection closed');
+        console.log('WebSocket closed');
       };
     }
 
@@ -138,6 +158,7 @@
         showStatus('Please enter a valid API Token!', 'error');
         return;
       }
+      serverIndex = 0;
       initConnection(token);
     });
 
