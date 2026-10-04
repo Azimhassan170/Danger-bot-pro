@@ -283,19 +283,17 @@
         function toggleDrawer() {
             document.getElementById('drawer').classList.toggle('hidden');
         }
-
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('bg-indigo-800', 'text-white');
                 btn.classList.add('text-indigo-200');
             });
-
             const selectedTab = document.getElementById('tab-' + tabId);
             const selectedBtn = document.getElementById('btn-' + tabId);
 
             if (selectedTab) selectedTab.classList.remove('hidden');
-            if (selectedBtn) {
+           if (selectedBtn) {
                 selectedBtn.classList.add('bg-indigo-800', 'text-white');
                 selectedBtn.classList.remove('text-indigo-200');
             }
