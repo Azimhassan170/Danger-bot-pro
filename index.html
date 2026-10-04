@@ -51,8 +51,11 @@
   </div>
 
   <script>
+    // Official Deriv WebSocket Endpoint
     const APP_ID = 1089;
-    const REST_URL = `https://ws.derivws.com/websockets/v3?app_id=${APP_ID}`;
+    const WS_URL = `wss://ws.deriv.com/websockets/v3?app_id=${APP_ID}`;
+
+    let ws = null;
 
     const tokenInput = document.getElementById('api-token');
     const connectBtn = document.getElementById('connect-btn');
@@ -70,12 +73,27 @@
       statusMsg.style.display = 'block';
     }
 
-    async function verifyToken(token) {
+    function initConnection(token) {
       showStatus('Connecting to Server...', 'info');
 
+      if (ws) {
+        ws.close();
+      }
+
       try {
-        const response = await fetch(`${REST_URL}&authorize=${encodeURIComponent(token)}`);
-        const data = await response.json();
+        ws = new WebSocket(WS_URL);
+      } catch (err) {
+        showStatus('WebSocket initialization failed.', 'error');
+        return;
+      }
+
+      ws.onopen = () => {
+        showStatus('Authenticating Token...', 'info');
+        ws.send(JSON.stringify({ authorize: token }));
+      };
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
 
         if (data.error) {
           showStatus(`Error: ${data.error.message}`, 'error');
@@ -93,10 +111,25 @@
           userLoginid.textContent = data.authorize.loginid;
           userBalance.textContent = `${data.authorize.balance} ${data.authorize.currency}`;
           userCurrency.textContent = data.authorize.currency;
+
+          // Request live balance updates
+          ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
         }
-      } catch (err) {
+
+        if (data.msg_type === 'balance') {
+          if (data.balance) {
+            userBalance.textContent = `${data.balance.balance} ${data.balance.currency}`;
+          }
+        }
+      };
+
+      ws.onerror = () => {
         showStatus('Connection Error. Check Network.', 'error');
-      }
+      };
+
+      ws.onclose = () => {
+        console.log('Connection closed');
+      };
     }
 
     connectBtn.addEventListener('click', () => {
@@ -105,11 +138,12 @@
         showStatus('Please enter a valid API Token!', 'error');
         return;
       }
-      verifyToken(token);
+      initConnection(token);
     });
 
     logoutBtn.addEventListener('click', () => {
       localStorage.removeItem('deriv_token');
+      if (ws) ws.close();
       authBox.style.display = 'block';
       userInfo.style.display = 'none';
       statusMsg.style.display = 'none';
@@ -120,7 +154,7 @@
       const savedToken = localStorage.getItem('deriv_token');
       if (savedToken) {
         tokenInput.value = savedToken;
-        verifyToken(savedToken);
+        initConnection(savedToken);
       }
     });
   </script>
