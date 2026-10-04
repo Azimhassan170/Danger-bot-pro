@@ -173,32 +173,46 @@
         return;
       }
 
-      const ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
+      // Using Deriv primary WebSocket endpoint with fallback handling
+      const wsUrl = 'wss://ws.derivws.com/websockets/v3?app_id=1089';
+      let ws;
+
+      try {
+        ws = new WebSocket(wsUrl);
+      } catch (err) {
+        alert('Failed to initialize WebSocket connection.');
+        return;
+      }
       
       ws.onopen = () => {
         ws.send(JSON.stringify({ authorize: token }));
       };
 
       ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.msg_type === 'authorize') {
-          localStorage.setItem('deriv_token', token);
-          closeLoginModal();
-          document.getElementById('login-btn').textContent = 'Connected';
-          document.getElementById('login-btn').style.background = '#22c55e';
-          document.getElementById('signup-btn').style.display = 'none';
-          document.getElementById('user-balance-display').textContent = `${data.authorize.currency} ${data.authorize.balance}`;
-          ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
-          alert('Successfully Connected!');
-        } else if (data.msg_type === 'balance') {
-          document.getElementById('user-balance-display').textContent = `${data.balance.currency} ${data.balance.balance}`;
-        } else if (data.error) {
-          alert('Error: ' + data.error.message);
+        try {
+          const data = JSON.parse(event.data);
+          if (data.msg_type === 'authorize') {
+            localStorage.setItem('deriv_token', token);
+            closeLoginModal();
+            document.getElementById('login-btn').textContent = 'Connected';
+            document.getElementById('login-btn').style.background = '#22c55e';
+            document.getElementById('signup-btn').style.display = 'none';
+            document.getElementById('user-balance-display').textContent = `${data.authorize.currency} ${data.authorize.balance}`;
+            ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
+            alert('Successfully Connected!');
+          } else if (data.msg_type === 'balance') {
+            document.getElementById('user-balance-display').textContent = `${data.balance.currency} ${data.balance.balance}`;
+          } else if (data.error) {
+            alert('Deriv Error: ' + data.error.message);
+          }
+        } catch (e) {
+          console.error(e);
         }
       };
 
-      ws.onerror = () => {
-        alert('Connection error with Deriv API.');
+      ws.onerror = (error) => {
+        console.error('WebSocket Error:', error);
+        alert('Connection error with Deriv API. Please check your internet connection or try refreshing the page.');
       };
     }
 
@@ -206,7 +220,8 @@
       const savedToken = localStorage.getItem('deriv_token');
       if (savedToken) {
         document.getElementById('api-token-input').value = savedToken;
-        connectDeriv();
+        // Small delay to ensure DOM is ready
+        setTimeout(connectDeriv, 500);
       }
     };
   </script>
