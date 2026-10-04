@@ -6,166 +6,172 @@
   <title>MuskanDangerBotPro - Trading Workspace</title>
   <style>
     :root {
-      -bg-color: #0b132b;
-      -panel-bg: #1c2541;
-      -border-color: #3a506b;
-      -accent-color: #4ea8de;
-      -text-main: #ffffff;
-      -text-muted: #8d99ae;
-      -success: #2ec4b6;
+      --bg-color: #0b132b;
+      --panel-bg: #1c2541;
+      --border-color: #3a506b;
+      --accent-color: #4ea8de;
+      --text-main: #ffffff;
+      --text-muted: #8d99ae;
+      --success: #2ec4b6;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: var(-bg-color); color: var(-text-main); min-height: 100vh; display: flex; flex-direction: column; }
+    body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
     
-    /* Top Navigation bar */
-    header { background: #080c1f; border-bottom: 1px solid var(-border-color); display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; overflow-x: auto; white-space: nowrap; }
-    .nav-tabs { display: flex; gap: 10px; align-items: center; }
-    .tab-btn { background: transparent; border: none; color: var(-text-muted); padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: 0.2s; }
-    .tab-btn:hover, .tab-btn.active { background: var(-accent-color); color: #fff; }
+    /* Top Header & Navigation */
+    header { background: #080c1f; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; flex-wrap: wrap; gap: 10px; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .header-btn { background: linear-gradient(135deg, #1e3a8a, #2563eb); border: 1px solid #3b82f6; color: #fff; padding: 6px 14px; font-size: 13px; font-weight: 600; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+    .header-btn:hover { opacity: 0.9; }
+
+    .nav-container { background: #0b132b; border-bottom: 1px solid var(--border-color); display: flex; overflow-x: auto; white-space: nowrap; padding: 5px 15px; gap: 8px; }
+    .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: 0.2s; }
+    .tab-btn:hover, .tab-btn.active { background: var(--accent-color); color: #fff; }
     
     .user-profile { display: flex; align-items: center; gap: 15px; font-size: 14px; }
-    .balance-box { background: var(-panel-bg); padding: 6px 12px; border-radius: 6px; border: 1px solid var(-border-color); font-weight: bold; color: var(-success); }
+    .balance-box { background: var(--panel-bg); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-weight: bold; color: var(--success); }
 
-    /* Main Content Area */
     .main-content { flex: 1; padding: 20px; overflow-y: auto; }
     .section-view { display: none; }
     .section-view.active { display: block; }
 
-    /* Cards & Grids */
     .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
-    .card { background: var(-panel-bg); border: 1px solid var(-border-color); border-radius: 10px; padding: 20px; cursor: pointer; transition: 0.2s; }
-    .card:hover { border-color: var(-accent-color); transform: translateY(-2px); }
-    .card h3 { font-size: 16px; margin-bottom: 8px; color: var(-accent-color); }
-    .card p { font-size: 12px; color: var(-text-muted); }
+    .card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px; cursor: pointer; transition: 0.2s; }
+    .card:hover { border-color: var(--accent-color); transform: translateY(-2px); }
+    .card h3 { font-size: 16px; margin-bottom: 8px; color: var(--accent-color); }
+    .card p { font-size: 12px; color: var(--text-muted); }
 
-    /* Authentication Modal/Box */
-    .auth-container { max-width: 400px; margin: 50px auto; background: var(-panel-bg); padding: 25px; border-radius: 12px; border: 1px solid var(-border-color); text-align: center; }
-    .auth-container input { width: 100%; padding: 12px; margin: 15px 0; background: var(-bg-color); border: 1px solid var(-border-color); color: #fff; border-radius: 6px; outline: none; }
-    .auth-container button { width: 100%; padding: 12px; background: var(-accent-color); border: none; color: #fff; font-weight: bold; border-radius: 6px; cursor: pointer; }
+    /* Modal Popup for Login / API Token */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000; }
+    .modal-box { max-width: 400px; width: 90%; background: var(--panel-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; position: relative; }
+    .modal-box input { width: 100%; padding: 12px; margin: 15px 0; background: var(--bg-color); border: 1px solid var(--border-color); color: #fff; border-radius: 6px; outline: none; }
+    .modal-box button { width: 100%; padding: 12px; background: var(--accent-color); border: none; color: #fff; font-weight: bold; border-radius: 6px; cursor: pointer; }
+    .close-modal { position: absolute; top: 10px; right: 15px; background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; }
 
-    /* Footer Execution Bar */
-    footer { background: #080c1f; border-top: 1px solid var(-border-color); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+    footer { background: #080c1f; border-top: 1px solid var(--border-color); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
     .run-btn { background: #22c55e; color: #fff; border: none; padding: 8px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; }
   </style>
 </head>
 <body>
 
-  <!-- Header Navigation -->
+  <!-- Top Header with Log in & API Token Buttons -->
   <header>
-    <div class="nav-tabs">
-      <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
-      <button class="tab-btn" onclick="switchTab('bot-builder')">Bot Builder</button>
-      <button class="tab-btn" onclick="switchTab('free-bots')">Free Bots</button>
-      <button class="tab-btn" onclick="switchTab('hedging')">Hedging Tool</button>
-      <button class="tab-btn" onclick="switchTab('ai-signal')">AI Signal</button>
-      <button class="tab-btn" onclick="switchTab('neurapulse')">NeuraPulse AI</button>
-      <button class="tab-btn" onclick="switchTab('quick-bot')">Quick Bot</button>
-      <button class="tab-btn" onclick="switchTab('auto-trader')">Auto Trader</button>
-    </div>
-    <div class="user-profile">
+    <div style="font-weight: bold; font-size: 16px; color: var(--accent-color);">MuskanDangerBotPro</div>
+    <div class="top-actions">
+      <button class="header-btn" onclick="openLoginModal()">Log in</button>
+      <button class="header-btn" onclick="openLoginModal()">API Token</button>
       <div class="balance-box" id="user-balance-display">USD 0.00</div>
     </div>
   </header>
 
-  <!-- Main Content -->
-  <div class="main-content">
+  <!-- Navigation Bar Tabs -->
+  <div class="nav-container">
+    <button class="tab-btn active" onclick="switchTab('dashboard', event)">Dashboard</button>
+    <button class="tab-btn" onclick="switchTab('bot-builder', event)">Bot Builder</button>
+    <button class="tab-btn" onclick="switchTab('free-bots', event)">Free Bots</button>
+    <button class="tab-btn" onclick="switchTab('hedging', event)">Hedging Tool</button>
+    <button class="tab-btn" onclick="switchTab('ai-signal', event)">AI Signal</button>
+    <button class="tab-btn" onclick="switchTab('neurapulse', event)">NeuraPulse AI</button>
+    <button class="tab-btn" onclick="switchTab('quick-bot', event)">Quick Bot</button>
+    <button class="tab-btn" onclick="switchTab('auto-trader', event)">Auto Trader</button>
+  </div>
 
+  <!-- Login Modal Popup -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal-box">
+      <button class="close-modal" onclick="closeLoginModal()">×</button>
+      <h2>Connect Deriv Account</h2>
+      <p style="color:var(--text-muted); font-size:12px; margin-top:5px;">Enter your Deriv Personal Access Token (PAT)</p>
+      <input type="password" id="api-token" placeholder="Paste your API token here...">
+      <button onclick="loginDeriv()">Authorize & Connect</button>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="main-content">
     <!-- DASHBOARD VIEW -->
     <div id="dashboard" class="section-view active">
-      <div id="login-section" class="auth-container">
-        <h2>MuskanDangerBotPro Login</h2>
-        <p style="color:var(-text-muted); font-size:12px; margin-top:5px;">Enter your Deriv Personal Access Token (PAT)</p>
-        <input type="password" id="api-token" placeholder="Personal Access Token...">
-        <button onclick="loginDeriv()">Connect & Authorize</button>
-      </div>
-
-      <div id="dashboard-content" style="display:none;">
-        <h2 style="margin-bottom: 15px;">Good evening, Master Trader</h2>
-        <p style="color: var(-text-muted); margin-bottom: 25px;">"Discipline beats intelligence in the long run."</p>
-        
-        <div class="grid-4">
-          <div class="card" onclick="switchTab('free-bots')">
-            <h3>👑 Premium Bots</h3>
-            <p>Explore elite automated trading strategies.</p>
-          </div>
-          <div class="card" onclick="switchTab('bot-builder')">
-            <h3>📤 Upload Bot</h3>
-            <p>Import XML bot configuration file.</p>
-          </div>
-          <div class="card" onclick="switchTab('free-bots')">
-            <h3>🤖 Free Bots</h3>
-            <p>Browse ready-made trading strategies.</p>
-          </div>
-          <div class="card" onclick="switchTab('quick-bot')">
-            <h3>⚡ Quick Bot Builder</h3>
-            <p>Create a bot with custom trade and risk settings.</p>
-          </div>
+      <h2 style="margin-bottom: 15px;">Good evening</h2>
+      <p style="color: var(--text-muted); margin-bottom: 25px;">"The trend is your friend — until it ends."</p>
+      
+      <div class="grid-4">
+        <div class="card" onclick="switchTab('free-bots', event)">
+          <h3>👑 Premium Bots</h3>
+          <p>Explore premium trading strategies.</p>
+        </div>
+        <div class="card" onclick="switchTab('bot-builder', event)">
+          <h3>📤 Upload Bot</h3>
+          <p>Import an XML bot from your computer.</p>
+        </div>
+        <div class="card" onclick="switchTab('free-bots', event)">
+          <h3>🤖 Free Bots</h3>
+          <p>Browse ready-made automated bots.</p>
+        </div>
+        <div class="card" onclick="switchTab('quick-bot', event)">
+          <h3>⚡ Quick Bot Builder</h3>
+          <p>Create a bot with custom settings.</p>
         </div>
       </div>
     </div>
 
-    <!-- BOT BUILDER VIEW -->
+    <!-- OTHER VIEWS -->
     <div id="bot-builder" class="section-view">
       <h2>Bot Builder Workspace</h2>
-      <p style="color:var(-text-muted); margin-top:10px;">Configure trade parameters, purchase conditions, and sell rules visually.</p>
+      <p style="color:var(--text-muted); margin-top:10px;">Configure trade parameters and purchase conditions visually.</p>
     </div>
-
-    <!-- FREE BOTS VIEW -->
     <div id="free-bots" class="section-view">
       <h2>Free & Smart Bots Library</h2>
       <div class="grid-4" style="margin-top:20px;">
-        <div class="card"><h3>Binary Matrix AI</h3><p>Advanced automated digit trading bot.</p><button style="margin-top:10px; width:100%; background:var(-accent-color); border:none; padding:6px; color:#fff; border-radius:4px;">Load Bot</button></div>
-        <div class="card"><h3>Digit Pro V1</h3><p>Smart recovery system for digits.</p><button style="margin-top:10px; width:100%; background:var(-accent-color); border:none; padding:6px; color:#fff; border-radius:4px;">Load Bot</button></div>
-        <div class="card"><h3>Entry Scanner Bot</h3><p>Scans entry ticks with precision confirmation.</p><button style="margin-top:10px; width:100%; background:var(-accent-color); border:none; padding:6px; color:#fff; border-radius:4px;">Load Bot</button></div>
-        <div class="card"><h3>Over/Under Virtual Hook</h3><p>Automate your trades with efficient hooks.</p><button style="margin-top:10px; width:100%; background:var(-accent-color); border:none; padding:6px; color:#fff; border-radius:4px;">Load Bot</button></div>
+        <div class="card"><h3>Binary Matrix AI</h3><p>Advanced automated digit trading bot.</p></div>
+        <div class="card"><h3>Digit Pro V1</h3><p>Smart recovery system for digits.</p></div>
+        <div class="card"><h3>Entry Scanner Bot</h3><p>Scans entry ticks with precision confirmation.</p></div>
+        <div class="card"><h3>Over/Under Virtual Hook</h3><p>Automate your trades with efficient hooks.</p></div>
       </div>
     </div>
-
-    <!-- HEDGING TOOL VIEW -->
     <div id="hedging" class="section-view">
       <h2>Hedging Tool</h2>
-      <p style="color:var(-text-muted); margin-top:10px;">Manage multi-market risk and execute balanced hedges automatically.</p>
+      <p style="color:var(--text-muted); margin-top:10px;">Manage multi-market risk automatically.</p>
     </div>
-
-    <!-- AI SIGNAL VIEW -->
     <div id="ai-signal" class="section-view">
       <h2>AI Signal Scanner</h2>
-      <p style="color:var(-text-muted); margin-top:10px;">Live market synchronization for Over/Under, Even/Odd and Rise/Fall.</p>
+      <p style="color:var(--text-muted); margin-top:10px;">Live market synchronization for digits and trends.</p>
     </div>
-
-    <!-- NEURAPULSE AI VIEW -->
     <div id="neurapulse" class="section-view">
       <h2>NeuraPulse AI Matrix</h2>
-      <p style="color:var(-text-muted); margin-top:10px;">Next-gen neural network automated parameters and take-profit controls.</p>
+      <p style="color:var(--text-muted); margin-top:10px;">Next-gen neural network automated parameters.</p>
     </div>
-
-    <!-- QUICK BOT VIEW -->
     <div id="quick-bot" class="section-view">
       <h2>Quick Bot Parameters</h2>
-      <p style="color:var(-text-muted); margin-top:10px;">Fast stake, Martingale, and automatic stop-loss configuration.</p>
+      <p style="color:var(--text-muted); margin-top:10px;">Fast stake, Martingale, and stop-loss configuration.</p>
     </div>
-
-    <!-- AUTO TRADER VIEW -->
     <div id="auto-trader" class="section-view">
       <h2>Auto Trader Cards</h2>
-      <p style="color:var(-text-muted); margin-top:10px;">Run multi-card strategies simultaneously with real-time analytics.</p>
+      <p style="color:var(--text-muted); margin-top:10px;">Run multi-card strategies simultaneously.</p>
     </div>
-
   </div>
 
-  <!-- Footer status bar -->
+  <!-- Footer -->
   <footer>
-    <div>Execution Mode: <span style="color:var(-accent-color); font-weight:bold;">FAST</span></div>
-    <button class="run-btn" id="run-status-btn">Bot is not running</button>
+    <div>Execution Mode: <span style="color:var(--accent-color); font-weight:bold;">FAST</span></div>
+    <button class="run-btn" id="run-status-btn">Run</button>
   </footer>
 
   <script>
-    function switchTab(tabId) {
+    function switchTab(tabId, evt) {
       document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
       
       document.getElementById(tabId).classList.add('active');
-      event.currentTarget.classList.add('active');
+      if(evt && evt.currentTarget) {
+        evt.currentTarget.classList.add('active');
+      }
+    }
+
+    function openLoginModal() {
+      document.getElementById('loginModal').style.display = 'flex';
+    }
+
+    function closeLoginModal() {
+      document.getElementById('loginModal').style.display = 'none';
     }
 
     function loginDeriv() {
@@ -174,25 +180,41 @@
         alert('Please enter your Personal Access Token');
         return;
       }
+
+      const wsUrl = 'wss://ws.derivws.com/websockets/v3?app_id=1089';
       
-      const ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
-      ws.onopen = () => { ws.send(JSON.stringify({ authorize: token })); };
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if(data.error) {
-          alert(data.error.message);
-        } else if(data.msg_type === 'authorize') {
-          document.getElementById('login-section').style.display = 'none';
-          document.getElementById('dashboard-content').style.display = 'block';
-          document.getElementById('user-balance-display').textContent = `${data.authorize.currency} ${data.authorize.balance}`;
-          ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
-        } else if(data.msg_type === 'balance') {
-          document.getElementById('user-balance-display').textContent = `${data.balance.currency} ${data.balance.balance}`;
-        }
-      };
-      ws.onerror = () => { alert('Connection error with Deriv API.'); };
+      try {
+        const ws = new WebSocket(wsUrl);
+        
+        ws.onopen = () => {
+          ws.send(JSON.stringify({ authorize: token }));
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if(data.error) {
+              alert('Deriv Error: ' + data.error.message);
+            } else if(data.msg_type === 'authorize') {
+              closeLoginModal();
+              document.getElementById('user-balance-display').textContent = `${data.authorize.currency} ${data.authorize.balance}`;
+              ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
+            } else if(data.msg_type === 'balance') {
+              document.getElementById('user-balance-display').textContent = `${data.balance.currency} ${data.balance.balance}`;
+            }
+          } catch(err) {
+            console.error('Parsing error:', err);
+          }
+        };
+
+        ws.onerror = (error) => {
+          console.error('WebSocket Error:', error);
+          alert('Connection error with Deriv API.');
+        };
+      } catch(e) {
+        alert('Failed to initialize WebSocket connection.');
+      }
     }
   </script>
-
 </body>
 </html>
