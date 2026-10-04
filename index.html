@@ -25,13 +25,13 @@
       <div class="space-y-4">
         <div>
           <label class="block text-xs font-medium text-slate-400 mb-1">API TOKEN</label>
-          <input type="text" id="apiTokenInput" placeholder="e.g. w1A2b3C4d5E6f7G" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500">
+          <input type="text" id="apiTokenInput" placeholder="e.g. w1A2b3C4d5E6f7G" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:outline-none focus:border-indigo-500 text-white">
         </div>
         <button id="saveTokenBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-lg font-semibold transition">
           Connect Token
         </button>
         <div class="text-center text-xs text-slate-500 my-2">OR</div>
-        <a href="https://oauth.deriv.com/oauth2/authorize?app_id=1089&l=EN" target="_blank" class="block w-full text-center bg-slate-800 hover:bg-slate-700 py-3 rounded-lg font-semibold transition">
+        <a href="https://oauth.deriv.com/oauth2/authorize?app_id=1089" class="block w-full text-center bg-slate-800 hover:bg-slate-700 py-3 rounded-lg font-semibold transition">
           Log in with Deriv OAuth
         </a>
       </div>
@@ -41,7 +41,7 @@
   </div>
 
   <script>
-    // 1. Force Unregister Old Service Workers
+    // 1. Service Worker Reset
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(registrations => {
         for (let registration of registrations) {
@@ -50,7 +50,7 @@
       });
     }
 
-    // 2. Modal Toggle Handlers
+    // 2. Modal Handlers
     const modal = document.getElementById('authModal');
     const loginBtn = document.getElementById('mainLoginBtn');
     const closeBtn = document.getElementById('closeModalBtn');
