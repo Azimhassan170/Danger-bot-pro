@@ -2,15 +2,17 @@
   "name": "Danger Devil Bot Pro",
   "short_name": "DangerBot",
   "description": "Danger Devil Bot Pro Trading Application",
-  "start_url": "/dangerdevilBotPro/",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "icons": [
     {
-      "src": "https://azimhassan170.github.io/dangerdevilBotPro/icon-512.png",
+      "src": "https://via.placeholder.com/512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
