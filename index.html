@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MuskanDangerBotPro - Trading Workspace</title>
+  <!-- Dynamic PWA Manifest for Single File -->
+  <link rel="manifest" id="dynamic-manifest">
   <style>
     :root {
       --bg-color: #0b132b;
@@ -21,6 +23,7 @@
     .top-actions { display: flex; align-items: center; gap: 8px; }
     .header-btn { background: linear-gradient(135deg, #1e3a8a, #2563eb); border: 1px solid #3b82f6; color: #fff; padding: 6px 14px; font-size: 13px; font-weight: 600; border-radius: 6px; cursor: pointer; transition: 0.2s; }
     .header-btn:hover { opacity: 0.9; }
+    #install-btn { background: linear-gradient(135deg, #059669, #10b981); border-color: #34d399; display: none; }
 
     .nav-container { background: #0b132b; border-bottom: 1px solid var(--border-color); display: flex; overflow-x: auto; white-space: nowrap; padding: 5px 15px; gap: 8px; }
     .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: 0.2s; }
@@ -54,6 +57,7 @@
   <header>
     <div style="font-weight: bold; font-size: 16px; color: var(--accent-color);">MuskanDangerBotPro</div>
     <div class="top-actions">
+      <button class="header-btn" id="install-btn" onclick="installApp()">📲 Install App</button>
       <button class="header-btn" id="signup-btn" onclick="openLoginModal()">Sign up</button>
       <button class="header-btn" id="login-btn" onclick="openLoginModal()">Log in</button>
       <div class="balance-box" id="user-balance-display">USD 0.00</div>
@@ -148,6 +152,44 @@
   </footer>
 
   <script>
+    // Generate PWA manifest dynamically so no separate file is needed
+    const manifestData = {
+      "name": "MuskanDangerBotPro",
+      "short_name": "DangerBot",
+      "start_url": window.location.href.split('?')[0],
+      "display": "standalone",
+      "background_color": "#0b132b",
+      "theme_color": "#0b132b",
+      "icons": [
+        {
+          "src": "https://img.icons8.com/color/192/bot.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    };
+    const blob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
+    document.getElementById('dynamic-manifest').href = URL.createObjectURL(blob);
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('install-btn').style.display = 'inline-block';
+    });
+
+    function installApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            document.getElementById('install-btn').style.display = 'none';
+          }
+          deferredPrompt = null;
+        });
+      }
+    }
+
     function switchTab(tabId, evt) {
       document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -173,7 +215,6 @@
         return;
       }
 
-      // Using Deriv primary WebSocket endpoint with fallback handling
       const wsUrl = 'wss://ws.derivws.com/websockets/v3?app_id=1089';
       let ws;
 
@@ -220,8 +261,7 @@
       const savedToken = localStorage.getItem('deriv_token');
       if (savedToken) {
         document.getElementById('api-token-input').value = savedToken;
-        // Small delay to ensure DOM is ready
-        setTimeout(connectDeriv, 500);
+        setTimeout(connectDer_iv = () => connectDeriv(), 500);
       }
     };
   </script>
