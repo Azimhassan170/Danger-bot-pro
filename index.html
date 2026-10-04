@@ -8,7 +8,6 @@
 </head>
 <body class="bg-slate-950 text-white min-h-screen">
 
-  <!-- Header Navigation -->
   <header class="flex justify-between items-center p-4 border-b border-slate-800">
     <h1 class="text-xl font-bold">BinaryTools</h1>
     <button id="mainLoginBtn" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg font-semibold transition">
@@ -16,7 +15,6 @@
     </button>
   </header>
 
-  <!-- Login Modal -->
   <div id="authModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4 z-50">
     <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-md w-full shadow-2xl">
       <h2 class="text-xl font-bold mb-4 text-center">Connect Your Account</h2>
@@ -31,9 +29,9 @@
           Connect Token
         </button>
         <div class="text-center text-xs text-slate-500 my-2">OR</div>
-        <a href="https://oauth.deriv.com/oauth2/authorize?app_id=1089" class="block w-full text-center bg-slate-800 hover:bg-slate-700 py-3 rounded-lg font-semibold transition">
+        <button id="derivOauthBtn" class="w-full bg-slate-800 hover:bg-slate-700 py-3 rounded-lg font-semibold transition text-center block">
           Log in with Deriv OAuth
-        </a>
+        </button>
       </div>
       
       <button id="closeModalBtn" class="mt-4 text-xs text-slate-500 hover:text-white w-full text-center">Close</button>
@@ -41,20 +39,21 @@
   </div>
 
   <script>
-    // 1. Service Worker Reset
+    // Registered Deriv App ID
+    const DERIV_APP_ID = '103001'; 
+
+    // Service Worker Clear
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(registrations => {
-        for (let registration of registrations) {
-          registration.unregister();
-        }
+        for (let registration of registrations) registration.unregister();
       });
     }
 
-    // 2. Modal Handlers
     const modal = document.getElementById('authModal');
     const loginBtn = document.getElementById('mainLoginBtn');
     const closeBtn = document.getElementById('closeModalBtn');
     const saveTokenBtn = document.getElementById('saveTokenBtn');
+    const oauthBtn = document.getElementById('derivOauthBtn');
 
     loginBtn.addEventListener('click', () => {
       modal.classList.remove('hidden');
@@ -66,25 +65,28 @@
       modal.classList.remove('flex');
     });
 
-    // 3. Connect API Token via WebSocket
+    // OAuth Redirect Handler
+    oauthBtn.addEventListener('click', () => {
+      const redirectUrl = encodeURIComponent(window.location.origin + window.location.pathname);
+      const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${DERIV_APP_ID}&redirect_uri=${redirectUrl}`;
+      window.location.href = oauthUrl;
+    });
+
+    // API Token WebSocket Connect
     saveTokenBtn.addEventListener('click', () => {
       const token = document.getElementById('apiTokenInput').value.trim();
       if (token) {
         localStorage.setItem('deriv_api_token', token);
-        
-        const ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
-        ws.onopen = () => {
-          ws.send(JSON.stringify({ authorize: token }));
-        };
+        const ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${DERIV_APP_ID}`);
+        ws.onopen = () => ws.send(JSON.stringify({ authorize: token }));
         ws.onmessage = (msg) => {
           const data = JSON.parse(msg.data);
           if (data.msg_type === 'authorize') {
-            alert('Connected Successfully as: ' + data.authorize.email);
+            alert('Connected Successfully: ' + data.authorize.email);
             modal.classList.add('hidden');
-            modal.classList.remove('flex');
             location.reload();
           } else if (data.error) {
-            alert('Invalid Token: ' + data.error.message);
+            alert('Error: ' + data.error.message);
           }
         };
       } else {
