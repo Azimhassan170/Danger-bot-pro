@@ -51,8 +51,8 @@
   </div>
 
   <script>
-    // Valid public Deriv WebSocket App ID
-    const APP_ID = 36300; 
+    // Universal Public Deriv WebSocket App ID
+    const APP_ID = 1089; 
     const WS_URL = `wss://ws.derivws.com/websockets/v3?app_id=${APP_ID}`;
     
     let ws = null;
@@ -107,7 +107,7 @@
           userBalance.textContent = `${data.authorize.balance} ${data.authorize.currency}`;
           userCurrency.textContent = data.authorize.currency;
 
-          // Request live balance subscription
+          // Live balance updates subscribe karein
           ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
         }
 
@@ -119,7 +119,7 @@
       };
 
       ws.onerror = (err) => {
-        showStatus('WebSocket Connection Error. Check Network or Token.', 'error');
+        showStatus('WebSocket Connection Error. Check Token or Network.', 'error');
       };
 
       ws.onclose = () => {
@@ -145,7 +145,7 @@
       tokenInput.value = '';
     });
 
-    // Auto connect on page refresh if token saved
+    // Page reload par auto connect agar token pehle se stored ho
     window.addEventListener('load', () => {
       const savedToken = localStorage.getItem('deriv_token');
       if (savedToken) {
