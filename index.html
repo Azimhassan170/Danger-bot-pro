@@ -94,7 +94,7 @@
 
     <!-- JavaScript Logic -->
     <script>
-        let ws;
+        let ws = null;
         let activeSymbol = 'R_100';
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -113,10 +113,14 @@
             }
 
             localStorage.setItem('deriv_api_token', token);
+            document.getElementById('livePrice').innerText = 'Connecting...';
 
-            if (ws) ws.close();
+            if (ws) {
+                ws.close();
+            }
 
-            ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
+            // Using official WebSocket endpoint
+            ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=66832');
 
             ws.onopen = () => {
                 ws.send(JSON.stringify({ authorize: token }));
@@ -127,7 +131,7 @@
 
                 if (data.msg_type === 'authorize') {
                     if (data.error) {
-                        alert('Invalid Token: ' + data.error.message);
+                        alert('Token Error: ' + data.error.message);
                         disconnectToken();
                         return;
                     }
@@ -136,7 +140,7 @@
                     document.getElementById('userAccountId').innerText = data.authorize.loginid;
                     document.getElementById('userBalance').innerText = '$' + data.authorize.balance + ' ' + data.authorize.currency;
 
-                    // Subscribe to ticks
+                    // Subscribe to market ticks after authorization
                     subscribeTicks(activeSymbol);
                 }
 
@@ -145,10 +149,19 @@
                         document.getElementById('livePrice').innerText = data.tick.quote;
                     }
                 }
+
+                if (data.error && data.msg_type !== 'authorize') {
+                    console.error('Deriv API Error:', data.error.message);
+                }
             };
 
-            ws.onerror = () => {
+            ws.onerror = (err) => {
+                console.error('WebSocket Error:', err);
                 document.getElementById('livePrice').innerText = 'Connection Error';
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket closed');
             };
         }
 
@@ -166,7 +179,9 @@
 
         function disconnectToken() {
             localStorage.removeItem('deriv_api_token');
-            if (ws) ws.close();
+            if (ws) {
+                ws.close();
+            }
             document.getElementById('loggedInNav').classList.add('hidden');
             document.getElementById('loggedOutNav').classList.remove('hidden');
             document.getElementById('livePrice').innerText = 'Disconnected';
