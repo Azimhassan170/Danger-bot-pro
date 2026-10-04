@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BinaryTools - Trading Platform</title>
-
-    <!-- Tailwind CSS & FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -16,7 +13,7 @@
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
 
-    <!-- Header / Navbar -->
+    <!-- Top Header Bar -->
     <header class="bg-white border-b border-gray-200 px-3 py-2 flex items-center justify-between sticky top-0 z-50 shadow-sm">
         <div class="flex items-center gap-2">
             <button onclick="toggleDrawer()" class="text-gray-600 text-lg px-2"><i class="fa-solid fa-bars"></i></button>
@@ -25,9 +22,7 @@
             </a>
         </div>
 
-        <!-- Auth & Account Section -->
         <div class="flex items-center gap-2">
-            <!-- Account Info (Visible when connected) -->
             <div id="accountInfo" class="hidden flex items-center gap-2 bg-gray-50 border border-gray-200 px-3 py-1 rounded-xl">
                 <i class="fa-solid fa-wallet text-indigo-900 text-sm"></i>
                 <div class="text-right">
@@ -35,13 +30,11 @@
                     <span id="accBalance" class="text-xs font-extrabold text-emerald-600 leading-none">$0.00 USD</span>
                 </div>
             </div>
-
-            <button id="btnLogin" onclick="openLoginModal()" class="bg-indigo-950 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl hover:bg-indigo-900 transition">Log In</button>
-            <a href="https://deriv.com" target="_blank" class="bg-indigo-900 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl hover:bg-indigo-800 transition">Sign Up</a>
+            <button id="btnLogin" onclick="openLoginModal()" class="bg-indigo-950 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl hover:bg-indigo-900 transition">Log In / Connect API</button>
         </div>
     </header>
 
-    <!-- Side Navigation Drawer -->
+    <!-- Side Navigation Menu -->
     <div id="drawer" class="fixed inset-0 bg-black/50 z-50 hidden transition-opacity">
         <div class="bg-white w-64 h-full p-4 shadow-xl flex flex-col justify-between">
             <div>
@@ -61,13 +54,11 @@
                     </button>
                 </div>
             </div>
-            <div class="text-[10px] text-gray-400">
-                BinaryTools Trading Suite v2.0
-            </div>
+            <div class="text-[10px] text-gray-400">BinaryTools Trading Suite v2.0</div>
         </div>
     </div>
 
-    <!-- Navigation Bar Tabs -->
+    <!-- Main Navigation Tabs -->
     <nav class="bg-indigo-950 text-white px-2 py-2 overflow-x-auto whitespace-nowrap no-scrollbar sticky top-[49px] z-40">
         <div class="flex space-x-1 min-w-max">
             <button onclick="switchTab('dashboard')" id="btn-dashboard" class="tab-btn bg-indigo-800 text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5">
@@ -94,53 +85,39 @@
         </div>
     </nav>
 
-    <!-- Content Sections -->
+    <!-- Page Content -->
     <main class="max-w-4xl mx-auto p-3 space-y-4">
-
-        <!-- 1. DASHBOARD -->
+        <!-- Dashboard Section -->
         <section id="tab-dashboard" class="tab-content space-y-4">
-            <!-- Search Bar -->
             <div class="relative">
                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-gray-400 text-xs"></i>
                 <input type="text" placeholder="Search For premium bots by name..." class="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none focus:border-indigo-600 shadow-sm">
             </div>
 
-            <!-- Categories Grid -->
             <div class="grid grid-cols-2 gap-3">
                 <div onclick="switchTab('bots')" class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 cursor-pointer hover:border-indigo-300 transition">
-                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-desktop"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg"><i class="fa-solid fa-desktop"></i></div>
                     <div>
                         <h4 class="text-xs font-bold text-gray-800">Local</h4>
                         <p class="text-[10px] text-gray-400">XML File Bots</p>
                     </div>
                 </div>
-
                 <div onclick="switchTab('bots')" class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 cursor-pointer hover:border-indigo-300 transition">
-                    <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-robot"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center text-lg"><i class="fa-solid fa-robot"></i></div>
                     <div>
                         <h4 class="text-xs font-bold text-gray-800">Premium Trading Bots</h4>
                         <p class="text-[10px] text-gray-400">High Accuracy</p>
                     </div>
                 </div>
-
                 <div onclick="switchTab('analysis')" class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 cursor-pointer hover:border-indigo-300 transition">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-chart-pie"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg"><i class="fa-solid fa-chart-pie"></i></div>
                     <div>
                         <h4 class="text-xs font-bold text-gray-800">Analysis Tools</h4>
                         <p class="text-[10px] text-gray-400">Market Scanner</p>
                     </div>
                 </div>
-
                 <div onclick="switchTab('speed')" class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 cursor-pointer hover:border-indigo-300 transition">
-                    <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-bolt"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center text-lg"><i class="fa-solid fa-bolt"></i></div>
                     <div>
                         <h4 class="text-xs font-bold text-gray-800">Speed Bot</h4>
                         <p class="text-[10px] text-gray-400">Fast Execution</p>
@@ -148,7 +125,6 @@
                 </div>
             </div>
 
-            <!-- Things You Need To Know Banner -->
             <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Things You Need To Know</span>
@@ -163,7 +139,7 @@
             </div>
         </section>
 
-        <!-- 2. BOT BUILDER -->
+        <!-- Bot Builder Section -->
         <section id="tab-builder" class="tab-content hidden space-y-3">
             <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
                 <div class="flex justify-between items-center border-b pb-2">
@@ -178,14 +154,12 @@
             </div>
         </section>
 
-        <!-- 3. TRADING BOTS STORE -->
+        <!-- Trading Bots Section -->
         <section id="tab-bots" class="tab-content hidden space-y-3">
             <div class="flex items-center justify-between">
                 <h3 class="text-xs font-bold text-gray-700 uppercase">Trading Bots Library</h3>
                 <span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full">PRO BOTS</span>
             </div>
-
-            <!-- Bot Item Cards -->
             <div class="space-y-2.5">
                 <div class="bg-indigo-950 text-white p-3.5 rounded-2xl flex items-center justify-between shadow-sm">
                     <div>
@@ -195,7 +169,6 @@
                     </div>
                     <button class="bg-white text-indigo-950 text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-gray-100">Load Bot</button>
                 </div>
-
                 <div class="bg-indigo-950 text-white p-3.5 rounded-2xl flex items-center justify-between shadow-sm">
                     <div>
                         <span class="text-[10px] text-emerald-400 font-bold">★ 92% Win Rate</span>
@@ -207,33 +180,30 @@
             </div>
         </section>
 
-        <!-- 4. ANALYSIS TOOLS -->
+        <!-- Analysis Tools Section -->
         <section id="tab-analysis" class="tab-content hidden space-y-3">
             <div class="bg-gray-900 text-white p-4 rounded-2xl shadow-md border border-gray-800 space-y-3">
                 <div class="text-center">
                     <h3 class="text-xs font-extrabold text-emerald-400 uppercase">BinaryToolFX Signal Scanner</h3>
                     <p class="text-[10px] text-gray-400">Select strategy and market to analyze real-time ticks</p>
                 </div>
-
                 <div class="space-y-2">
                     <select class="w-full bg-gray-800 text-xs border border-gray-700 rounded-xl px-3 py-2 outline-none">
                         <option>Select Strategy...</option>
                         <option>Digit Differ Over/Under</option>
                         <option>Matches/Differs Signal</option>
                     </select>
-
                     <select class="w-full bg-gray-800 text-xs border border-gray-700 rounded-xl px-3 py-2 outline-none">
                         <option>Select Market...</option>
                         <option>Volatility 100 Index</option>
                         <option>Volatility 75 Index</option>
                     </select>
-
                     <button class="w-full bg-emerald-600 text-white font-bold text-xs py-2 rounded-xl">Analyze Market</button>
                 </div>
             </div>
         </section>
 
-        <!-- 5. SMART TRADING -->
+        <!-- Smart Trading Section -->
         <section id="tab-smart" class="tab-content hidden space-y-3">
             <div class="grid grid-cols-2 gap-3">
                 <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm space-y-2">
@@ -244,7 +214,6 @@
                     </div>
                     <button class="w-full bg-indigo-950 text-white text-xs font-bold py-1.5 rounded-xl">Start Auto Trading</button>
                 </div>
-
                 <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm space-y-2">
                     <span class="text-xs font-bold text-gray-800 block">Even / Odd</span>
                     <div class="flex gap-1 text-[10px] font-bold text-center">
@@ -256,14 +225,13 @@
             </div>
         </section>
 
-        <!-- 6. AUTOMATED BOTS -->
+        <!-- Automated Bots Section -->
         <section id="tab-automated" class="tab-content hidden space-y-3">
             <div class="bg-white p-4 rounded-2xl border border-gray-200 space-y-3">
                 <div class="flex justify-between items-center border-b pb-2">
                     <h3 class="text-xs font-bold text-indigo-950">Automated AI Bots</h3>
                     <span class="text-[10px] text-gray-500 font-semibold">Stake: $1.00</span>
                 </div>
-
                 <div class="space-y-2">
                     <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 flex justify-between items-center">
                         <div>
@@ -276,11 +244,10 @@
             </div>
         </section>
 
-        <!-- 7. SPEED BOT -->
+        <!-- Speed Bot Section -->
         <section id="tab-speed" class="tab-content hidden space-y-3">
             <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
                 <h3 class="text-xs font-bold text-indigo-950 uppercase border-b pb-2">Trading Configuration</h3>
-
                 <div class="grid grid-cols-2 gap-3 text-xs">
                     <div>
                         <label class="text-[10px] font-bold text-gray-500 block mb-1">SYMBOL</label>
@@ -293,28 +260,22 @@
                         <input type="number" value="1" class="w-full border border-gray-200 rounded-xl p-2 font-semibold">
                     </div>
                 </div>
-
-                <button class="w-full bg-indigo-950 text-white font-bold text-xs py-2.5 rounded-xl shadow-md hover:bg-indigo-900">
-                    EXECUTE TRADES
-                </button>
+                <button class="w-full bg-indigo-950 text-white font-bold text-xs py-2.5 rounded-xl shadow-md hover:bg-indigo-900">EXECUTE TRADES</button>
             </div>
         </section>
-
     </main>
 
-    <!-- Login Modal -->
+    <!-- API Token Login Modal -->
     <div id="loginModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-2xl relative space-y-3">
-            <button onclick="closeLoginModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
+            <button onclick="closeLoginModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
             <h3 class="text-xs font-bold text-indigo-950 uppercase">Login With Deriv API Token</h3>
             <input type="password" id="apiToken" placeholder="Enter API Token" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-xs outline-none focus:border-indigo-600">
             <button onclick="loginWithToken()" class="w-full bg-indigo-950 text-white text-xs font-bold py-2 rounded-xl">Connect Account</button>
         </div>
     </div>
 
-    <!-- UI Logic Scripts -->
+    <!-- JavaScript Navigation & Logic -->
     <script>
         function toggleDrawer() {
             document.getElementById('drawer').classList.toggle('hidden');
@@ -333,4 +294,21 @@
             if (selectedTab) selectedTab.classList.remove('hidden');
             if (selectedBtn) {
                 selectedBtn.classList.add('bg-indigo-800', 'text-white');
-                selectedBtn.classLis
+                selectedBtn.classList.remove('text-indigo-200');
+            }
+        }
+
+        function openLoginModal() { document.getElementById('loginModal').classList.remove('hidden'); }
+        function closeLoginModal() { document.getElementById('loginModal').classList.add('hidden'); }
+
+        function loginWithToken() {
+            const token = document.getElementById('apiToken').value.trim();
+            if (!token) return alert('Token enter karein');
+            
+            localStorage.setItem('deriv_token', token);
+            document.getElementById('btnLogin').classList.add('hidden');
+            document.getElementById('accountInfo').classList.remove('hidden');
+            closeLoginModal();
+        }
+
+        functi
