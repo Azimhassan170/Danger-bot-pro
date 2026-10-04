@@ -24,35 +24,66 @@
             </a>
         </div>
 
-        <!-- Before Token Connect -->
+        <!-- Before Login (Log in & Sign up Buttons) -->
         <div id="loggedOutNav" class="flex items-center space-x-2">
-            <input type="password" id="apiTokenInput" placeholder="Enter Deriv API Token" class="border border-gray-300 px-3 py-1.5 rounded-xl text-xs outline-none focus:border-indigo-600 w-36 sm:w-48">
-            <button onclick="connectWithToken()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs">
-                Connect
+            <button onclick="openLoginModal()" class="bg-white hover:bg-gray-50 text-indigo-950 border border-indigo-950 font-bold px-3.5 py-1.5 rounded-xl text-xs transition">
+                Log in
             </button>
+            <a href="https://track.deriv.com/_b2Nl_O3m6q22ZdMg3k2d3WNdUU23N3v2/1/" target="_blank" class="bg-indigo-950 hover:bg-indigo-900 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs transition">
+                Sign up
+            </a>
         </div>
 
-        <!-- After Token Connect -->
+        <!-- After Login -->
         <div id="loggedInNav" class="hidden flex items-center space-x-3">
             <div class="text-right">
                 <span id="userAccountId" class="text-xs font-bold text-gray-800 block">CR---</span>
                 <span id="userBalance" class="text-xs font-black text-emerald-600">$0.00 USD</span>
             </div>
             <button onclick="disconnectToken()" class="bg-rose-100 text-rose-600 font-bold px-3 py-1.5 rounded-xl text-xs">
-                Disconnect
+                Logout
             </button>
         </div>
     </header>
 
+    <!-- Login Modal Pop-up -->
+    <div id="loginModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl relative">
+            <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-lg font-bold text-indigo-950 mb-1">Login with API Token</h3>
+            <p class="text-xs text-gray-500 mb-4">Enter your Deriv API Token below to connect your account.</p>
+            
+            <input type="password" id="apiTokenInput" placeholder="Enter Deriv API Token" class="w-full border border-gray-300 px-3.5 py-2.5 rounded-xl text-xs outline-none focus:border-indigo-600 mb-4">
+            
+            <button onclick="connectWithToken()" class="w-full bg-indigo-950 hover:bg-indigo-900 text-white font-bold py-2.5 rounded-xl text-xs transition">
+                Connect Account
+            </button>
+        </div>
+    </div>
+
     <!-- Navigation Tabs -->
     <div class="bg-indigo-50/50 p-2 border-b border-gray-200 overflow-x-auto whitespace-nowrap">
         <div class="max-w-4xl mx-auto flex space-x-2">
-            <button onclick="switchTab('dashboard')" id="btn-dashboard" class="tab-btn bg-indigo-950 text-white px-4 py-2 rounded-xl text-xs font-bold">Dashboard</button>
-            <button onclick="switchTab('speedbot')" id="btn-speedbot" class="tab-btn bg-white text-gray-700 px-4 py-2 rounded-xl text-xs font-bold">SpeedBot</button>
-            <button onclick="switchTab('analysis')" id="btn-analysis" class="tab-btn bg-white text-gray-700 px-4 py-2 rounded-xl text-xs font-bold">Analysis</button>
-            <button onclick="switchTab('smart')" id="btn-smart" class="tab-btn bg-white text-gray-700 px-4 py-2 rounded-xl text-xs font-bold">Smart</button>
-            <button onclick="switchTab('autobots')" id="btn-autobots" class="tab-btn bg-white text-gray-700 px-4 py-2 rounded-xl text-xs font-bold">AutoBots</button>
-            <button onclick="switchTab('builder')" id="btn-builder" class="tab-btn bg-white text-gray-700 px-4 py-2 rounded-xl text-xs font-bold">Builder</button>
+            <button onclick="switchTab('dashboard')" id="btn-dashboard" class="tab-btn bg-indigo-950 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-house"></i> <span>Dashboard</span>
+            </button>
+            <button onclick="switchTab('speedbot')" id="btn-speedbot" class="tab-btn bg-white text-gray-700 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-rocket"></i> <span>SpeedBot</span>
+            </button>
+            <button onclick="switchTab('analysis')" id="btn-analysis" class="tab-btn bg-white text-gray-700 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-chart-line"></i> <span>Analysis</span>
+            </button>
+            <button onclick="switchTab('smart')" id="btn-smart" class="tab-btn bg-white text-gray-700 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-brain"></i> <span>Smart</span>
+            </button>
+            <button onclick="switchTab('autobots')" id="btn-autobots" class="tab-btn bg-white text-gray-700 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-robot"></i> <span>AutoBots</span>
+            </button>
+            <button onclick="switchTab('builder')" id="btn-builder" class="tab-btn bg-white text-gray-700 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-wrench"></i> <span>Builder</span>
+            </button>
         </div>
     </div>
 
@@ -105,6 +136,14 @@
             }
         });
 
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.add('hidden');
+        }
+
         function connectWithToken() {
             const token = document.getElementById('apiTokenInput').value.trim();
             if (!token) {
@@ -116,11 +155,10 @@
             document.getElementById('livePrice').innerText = 'Connecting...';
 
             if (ws) {
-                ws.close();
+                try { ws.close(); } catch(e){}
             }
 
-            // Using official WebSocket endpoint
-            ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=66832');
+            ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1010');
 
             ws.onopen = () => {
                 ws.send(JSON.stringify({ authorize: token }));
@@ -131,16 +169,17 @@
 
                 if (data.msg_type === 'authorize') {
                     if (data.error) {
-                        alert('Token Error: ' + data.error.message);
+                        alert('Deriv Error: ' + data.error.message);
                         disconnectToken();
                         return;
                     }
+                    closeLoginModal();
                     document.getElementById('loggedOutNav').classList.add('hidden');
                     document.getElementById('loggedInNav').classList.remove('hidden');
                     document.getElementById('userAccountId').innerText = data.authorize.loginid;
                     document.getElementById('userBalance').innerText = '$' + data.authorize.balance + ' ' + data.authorize.currency;
 
-                    // Subscribe to market ticks after authorization
+                    // Subscribe to ticks
                     subscribeTicks(activeSymbol);
                 }
 
@@ -149,19 +188,10 @@
                         document.getElementById('livePrice').innerText = data.tick.quote;
                     }
                 }
-
-                if (data.error && data.msg_type !== 'authorize') {
-                    console.error('Deriv API Error:', data.error.message);
-                }
             };
 
-            ws.onerror = (err) => {
-                console.error('WebSocket Error:', err);
-                document.getElementById('livePrice').innerText = 'Connection Error';
-            };
-
-            ws.onclose = () => {
-                console.log('WebSocket closed');
+            ws.onerror = () => {
+                document.getElementById('livePrice').innerText = 'Reconnecting...';
             };
         }
 
@@ -180,7 +210,7 @@
         function disconnectToken() {
             localStorage.removeItem('deriv_api_token');
             if (ws) {
-                ws.close();
+                try { ws.close(); } catch(e){}
             }
             document.getElementById('loggedInNav').classList.add('hidden');
             document.getElementById('loggedOutNav').classList.remove('hidden');
