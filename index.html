@@ -26,7 +26,7 @@
 
     <!-- Before Login -->
     <div id="loggedOutNav" class="flex items-center space-x-2">
-      <button onclick="loginWithDeriv()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-1.5 rounded-xl text-xs">
+      <button onclick="window.location.href='https://oauth.deriv.com/oauth2/authorize?app_id=66832&l=EN&brand=deriv'" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-1.5 rounded-xl text-xs flex items-center space-x-2">
         <span class="font-black text-lg">d</span> Deriv OAuth Login
       </button>
     </div>
@@ -91,7 +91,10 @@
     </div>
   </main>
 
-  <script>
+  <script>function loginWithDeriv() {
+    const appId = '66832'; // Agar aapka apna Deriv App ID hai toh '66832' ki jagah wo likhein
+    window.location.href = `https://oauth.deriv.com/oauth2/authorize?app_id=${appId}&l=EN&brand=deriv`;
+}
     // Tab Switching Logic
     function switchTab(tabName) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
