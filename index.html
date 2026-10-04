@@ -3,243 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BinaryTools - Deriv Live Trading Platform</title>
+    <title>BinaryTools - Trading Platform</title>
 
-    <!-- PWA Manifest & Description -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="description" content="Danger Devil Bot Pro Trading Application">
-
-    <!-- Stylesheets & Tailwind CDN -->
+    <!-- Tailwind CSS & FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-100 text-gray-800 font-sans min-h-screen pb-10">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-    <!-- Top Header -->
-    <header class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40 shadow-sm">
-        <div class="flex items-center space-x-3">
-            <button class="text-gray-600 text-xl"><i class="fa-solid fa-bars"></i></button>
-            <a href="https://t.me" target="_blank" class="bg-sky-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center space-x-1">
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
+
+    <!-- Header / Navbar -->
+    <header class="bg-white border-b border-gray-200 px-3 py-2 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+        <div class="flex items-center gap-2">
+            <button onclick="toggleDrawer()" class="text-gray-600 text-lg px-2"><i class="fa-solid fa-bars"></i></button>
+            <a href="https://t.me" target="_blank" class="bg-sky-500 hover:bg-sky-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 transition">
                 <i class="fa-paper-plane"></i> <span>Telegram</span>
             </a>
         </div>
 
-        <!-- Before Login (Log in & Sign up Buttons) -->
-        <div id="loggedOutNav" class="flex items-center space-x-2">
-            <button onclick="openLoginModal()" class="bg-white hover:bg-gray-50 text-indigo-950 border border-indigo-950 font-bold px-3.5 py-1.5 rounded-xl text-xs transition">
-                Log in
-            </button>
-            <a href="https://track.deriv.com/_b2Nl_O3m6q22ZdMg3k2d3WNdUU23N3v2/1/" target="_blank" class="bg-indigo-950 hover:bg-indigo-900 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs transition">
-                Sign up
-            </a>
-        </div>
-
-        <!-- After Login -->
-        <div id="loggedInNav" class="hidden flex items-center space-x-3">
-            <div class="text-right">
-                <span id="userAccountId" class="text-xs font-bold text-gray-800 block">CR---</span>
-                <span id="userBalance" class="text-xs font-black text-emerald-600">$0.00 USD</span>
+        <!-- Auth & Account Section -->
+        <div class="flex items-center gap-2">
+            <!-- Account Info (Visible when connected) -->
+            <div id="accountInfo" class="hidden flex items-center gap-2 bg-gray-50 border border-gray-200 px-3 py-1 rounded-xl">
+                <i class="fa-solid fa-wallet text-indigo-900 text-sm"></i>
+                <div class="text-right">
+                    <span id="accId" class="text-[10px] font-bold text-gray-500 block leading-none">CR000000</span>
+                    <span id="accBalance" class="text-xs font-extrabold text-emerald-600 leading-none">$0.00 USD</span>
+                </div>
             </div>
-            <button onclick="disconnectToken()" class="bg-rose-100 text-rose-600 font-bold px-3 py-1.5 rounded-xl text-xs">
-                Logout
-            </button>
+
+            <button id="btnLogin" onclick="openLoginModal()" class="bg-indigo-950 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl hover:bg-indigo-900 transition">Log In</button>
+            <a href="https://deriv.com" target="_blank" class="bg-indigo-900 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl hover:bg-indigo-800 transition">Sign Up</a>
         </div>
     </header>
 
-    <!-- Login Modal Pop-up -->
-    <div id="loginModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl relative">
-            <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <h3 class="text-lg font-bold text-indigo-950 mb-1">Login with API Token</h3>
-            <p class="text-xs text-gray-500 mb-4">Enter your Deriv API Token below to connect your account.</p>
-            
-            <input type="password" id="apiTokenInput" placeholder="Enter Deriv API Token" class="w-full border border-gray-300 px-3.5 py-2.5 rounded-xl text-xs outline-none focus:border-indigo-600 mb-4">
-            
-            <button onclick="connectWithToken()" class="w-full bg-indigo-950 hover:bg-indigo-900 text-white font-bold py-2.5 rounded-xl text-xs transition">
-                Connect Account
-            </button>
-        </div>
-    </div>
-
-    <!-- Navigation Tabs -->
-    <div class="bg-indigo-50/50 p-2 border-b border-gray-200 overflow-x-auto whitespace-nowrap">
-        <div class="max-w-4xl mx-auto flex space-x-2">
-            <button onclick="switchTab('dashboard')" id="btn-dashboard" class="tab-btn bg-indigo-950 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                <i class="fa-solid fa-house"></i> <span>Dashboard</span>
-            </button>
-            <button onclick="switchTab('speedbot')" id="btn-speedbot" class="tab-btn bg-white text-gray-700 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                <i class="fa-solid fa-rocket"></i> <span>SpeedBot</span>
-            </button>
-            <button onclick="switchTab('analysis')" id="btn-analysis" class="tab-btn bg-white text-gray-700 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                <i class="fa-solid fa-chart-line"></i> <span>Analysis</span>
-            </button>
-            <button onclick="switchTab('smart')" id="btn-smart" class="tab-btn bg-white text-gray-700 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                <i class="fa-solid fa-brain"></i> <span>Smart</span>
-            </button>
-            <button onclick="switchTab('autobots')" id="btn-autobots" class="tab-btn bg-white text-gray-700 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                <i class="fa-solid fa-robot"></i> <span>AutoBots</span>
-            </button>
-            <button onclick="switchTab('builder')" id="btn-builder" class="tab-btn bg-white text-gray-700 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                <i class="fa-solid fa-wrench"></i> <span>Builder</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Live Ticker Bar -->
-    <div class="max-w-4xl mx-auto p-4 pb-0">
-        <div class="bg-gray-900 text-white p-3.5 rounded-2xl flex items-center justify-between shadow-md">
-            <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <select id="symbolSelect" onchange="changeSymbol()" class="bg-gray-800 text-white text-xs font-bold rounded-lg px-2 py-1 outline-none">
-                    <option value="R_100">Volatility 100 Index</option>
-                    <option value="R_75">Volatility 75 Index</option>
-                    <option value="R_50">Volatility 50 Index</option>
-                    <option value="1HZ100V">Volatility 100 (1s) Index</option>
-                </select>
-            </div>
-            <div class="text-right">
-                <span class="text-[10px] text-gray-400 block font-semibold uppercase">Live Tick</span>
-                <span id="livePrice" class="text-lg font-mono font-bold text-amber-400">Disconnected</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Container -->
-    <main class="max-w-4xl mx-auto p-4">
-        <!-- DASHBOARD -->
-        <div id="tab-dashboard" class="tab-content space-y-4">
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
-                    <span class="text-xs text-gray-500 font-semibold block">Total Profit/Loss</span>
-                    <span id="totalPL" class="text-xl font-black text-gray-800">$0.00</span>
+    <!-- Side Navigation Drawer -->
+    <div id="drawer" class="fixed inset-0 bg-black/50 z-50 hidden transition-opacity">
+        <div class="bg-white w-64 h-full p-4 shadow-xl flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between border-b pb-3 mb-4">
+                    <span class="font-bold text-indigo-950 flex items-center gap-2">
+                        <i class="fa-solid fa-robot"></i> BinaryTools
+                    </span>
+                    <button onclick="toggleDrawer()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
-                    <span class="text-xs text-gray-500 font-semibold block">Win Rate</span>
-                    <span id="winRate" class="text-xl font-black text-gray-800">0%</span>
+                <div class="space-y-3">
+                    <label class="flex items-center justify-between text-xs font-bold text-gray-600 cursor-pointer">
+                        <span>Dark Theme</span>
+                        <input type="checkbox" class="toggle-checkbox">
+                    </label>
+                    <button onclick="logout()" class="w-full text-left text-xs font-bold text-rose-600 flex items-center gap-2 py-2">
+                        <i class="fa-solid fa-right-from-bracket"></i> Log Out
+                    </button>
                 </div>
             </div>
+            <div class="text-[10px] text-gray-400">
+                BinaryTools Trading Suite v2.0
+            </div>
         </div>
+    </div>
+
+    <!-- Navigation Bar Tabs -->
+    <nav class="bg-indigo-950 text-white px-2 py-2 overflow-x-auto whitespace-nowrap no-scrollbar sticky top-[49px] z-40">
+        <div class="flex space-x-1 min-w-max">
+            <button onclick="switchTab('dashboard')" id="btn-dashboard" class="tab-btn bg-indigo-800 text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5">
+                <i class="fa-solid fa-house"></i> Dashboard
+            </button>
+            <button onclick="switchTab('builder')" id="btn-builder" class="tab-btn hover:bg-indigo-800/50 text-indigo-200 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5">
+                <i class="fa-solid fa-gears"></i> Bot Builder
+            </button>
+            <button onclick="switchTab('bots')" id="btn-bots" class="tab-btn hover:bg-indigo-800/50 text-indigo-200 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5">
+                <i class="fa-solid fa-robot"></i> Trading Bots
+            </button>
+            <button onclick="switchTab('analysis')" id="btn-analysis" class="tab-btn hover:bg-indigo-800/50 text-indigo-200 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5">
+                <i class="fa-solid fa-chart-line"></i> Analysis Tools
+            </button>
+            <button onclick="switchTab('smart')" id="btn-smart" class="tab-btn hover:bg-indigo-800/50 text-indigo-200 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5">
+                <i class="fa-solid fa-brain"></i> Smart Trading
+            </button>
+            <button onclick="switchTab('automated')" id="btn-automated" class="tab-btn hover:bg-indigo-800/50 text-indigo-200 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5">
+                <i class="fa-solid fa-microchip"></i> Automated Bots
+            </button>
+            <button onclick="switchTab('speed')" id="btn-speed" class="tab-btn hover:bg-indigo-800/50 text-indigo-200 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5">
+                <i class="fa-solid fa-bolt"></i> Speed Bot
+            </button>
+        </div>
+    </nav>
+
+    <!-- Content Sections -->
+    <main class="max-w-4xl mx-auto p-3 space-y-4">
+
+        <!-- 1. DASHBOARD -->
+        <section id="tab-dashboard" class="tab-content space-y-4">
+            <!-- Search Bar -->
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-gray-400 text-xs"></i>
+                <input type="text" placeholder="Search For premium bots by name..." class="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-4 py-2 text-xs outline-none focus:border-indigo-600 shadow-sm">
+            </div>
+
+            <!-- Categories Grid -->
+            <div class="grid grid-cols-2 gap-3">
+                <div onclick="switchTab('bots')" class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 cursor-pointer hover:border-indigo-300 transition">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-desktop"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-gray-800">Local</h4>
+                        <p class="text-[10px] text-gray-400">XML File Bots</p>
+                    </div>
+                </div>
+
+                <div onclick="switchTab('bots')" class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 cursor-pointer hover:border-indigo-300 transition">
+                    <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-gray-800">Premium Trading Bots</h4>
+                        <p class="text-[10px] text-gray-400">High Accuracy</p>
+                    </div>
+                </div>
+
+                <div onclick="switchTab('analysis')" class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 cursor-pointer hover:border-indigo-300 transition">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-chart-pie"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-gray-800">Analysis Tools</h4>
+                        <p class="text-[10px] text-gray-400">Market Scanner</p>
+                    </div>
+                </div>
+
+                <div onclick="switchTab('speed')" class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 cursor-pointer hover:border-indigo-300 transition">
+                    <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-gray-800">Speed Bot</h4>
+                        <p class="text-[10px] text-gray-400">Fast Execution</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Things You Need To Know Banner -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Things You Need To Know</span>
+                    <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">Info</span>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="text-indigo-900 text-xl pt-1"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                    <p class="text-xs text-gray-600 leading-relaxed">
+                        <strong class="text-gray-800">Bot Builder</strong> lets you create a custom strategy with drag-and-drop blocks — no coding knowledge required.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. BOT BUILDER -->
+        <section id="tab-builder" class="tab-content hidden space-y-3">
+            <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h3 class="text-xs font-bold text-indigo-950 uppercase">Deriv Bot Builder Workspace</h3>
+                    <button class="bg-indigo-950 text-white text-[11px] font-bold px-3 py-1 rounded-lg">Quick Strategy</button>
+                </div>
+                <div class="bg-gray-50 border border-dashed border-gray-300 rounded-xl h-64 flex flex-col items-center justify-center text-center p-4">
+                    <i class="fa-solid fa-cubes text-3xl text-indigo-900/40 mb-2"></i>
+                    <span class="text-xs font-bold text-gray-600">Blockly Canvas Area</span>
+                    <p class="text-[10px] text-gray-400 max-w-xs mt-1">Load XML strategies or configure custom trading rules using blocks.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. TRADING BOTS STORE -->
+        <section id="tab-bots" class="tab-content hidden space-y-3">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xs font-bold text-gray-700 uppercase">Trading Bots Library</h3>
+                <span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full">PRO BOTS</span>
+            </div>
+
+            <!-- Bot Item Cards -->
+            <div class="space-y-2.5">
+                <div class="bg-indigo-950 text-white p-3.5 rounded-2xl flex items-center justify-between shadow-sm">
+                    <div>
+                        <span class="text-[10px] text-amber-400 font-bold">★ 95% Win Rate</span>
+                        <h4 class="text-xs font-bold">V12 SMARTRSI BOT</h4>
+                        <p class="text-[10px] text-gray-300">Deriv V12 strategy with automated trade execution.</p>
+                    </div>
+                    <button class="bg-white text-indigo-950 text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-gray-100">Load Bot</button>
+                </div>
+
+                <div class="bg-indigo-950 text-white p-3.5 rounded-2xl flex items-center justify-between shadow-sm">
+                    <div>
+                        <span class="text-[10px] text-emerald-400 font-bold">★ 92% Win Rate</span>
+                        <h4 class="text-xs font-bold">DIGIT DIFFER BOT V2</h4>
+                        <p class="text-[10px] text-gray-300">24hrs profit running bot for automated digit trading.</p>
+                    </div>
+                    <button class="bg-white text-indigo-950 text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-gray-100">Load Bot</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. ANALYSIS TOOLS -->
+        <section id="tab-analysis" class="tab-content hidden space-y-3">
+            <div class="bg-gray-900 text-white p-4 rounded-2xl shadow-md border border-gray-800 space-y-3">
+                <div class="text-center">
+                    <h3 class="text-xs font-extrabold text-emerald-400 uppercase">BinaryToolFX Signal Scanner</h3>
+                    <p class="text-[10px] text-gray-400">Select strategy and market to analyze real-time ticks</p>
+                </div>
+
+                <div class="space-y-2">
+                    <select class="w-full bg-gray-800 text-xs border border-gray-700 rounded-xl px-3 py-2 outline-none">
+                        <option>Select Strategy...</option>
+                        <option>Digit Differ Over/Under</option>
+                        <option>Matches/Differs Signal</option>
+                    </select>
+
+                    <select class="w-full bg-gray-800 text-xs border border-gray-700 rounded-xl px-3 py-2 outline-none">
+                        <option>Select Market...</option>
+                        <option>Volatility 100 Index</option>
+                        <option>Volatility 75 Index</option>
+                    </select>
+
+                    <button class="w-full bg-emerald-600 text-white font-bold text-xs py-2 rounded-xl">Analyze Market</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. SMART TRADING -->
+        <section id="tab-smart" class="tab-content hidden space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm space-y-2">
+                    <span class="text-xs font-bold text-gray-800 block">Rise / Fall</span>
+                    <div class="flex gap-1 text-[10px] font-bold text-center">
+                        <span class="flex-1 bg-emerald-100 text-emerald-700 py-1 rounded-lg">Rise 51%</span>
+                        <span class="flex-1 bg-rose-100 text-rose-700 py-1 rounded-lg">Fall 49%</span>
+                    </div>
+                    <button class="w-full bg-indigo-950 text-white text-xs font-bold py-1.5 rounded-xl">Start Auto Trading</button>
+                </div>
+
+                <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm space-y-2">
+                    <span class="text-xs font-bold text-gray-800 block">Even / Odd</span>
+                    <div class="flex gap-1 text-[10px] font-bold text-center">
+                        <span class="flex-1 bg-emerald-100 text-emerald-700 py-1 rounded-lg">Even 55%</span>
+                        <span class="flex-1 bg-rose-100 text-rose-700 py-1 rounded-lg">Odd 45%</span>
+                    </div>
+                    <button class="w-full bg-indigo-950 text-white text-xs font-bold py-1.5 rounded-xl">Start Auto Trading</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. AUTOMATED BOTS -->
+        <section id="tab-automated" class="tab-content hidden space-y-3">
+            <div class="bg-white p-4 rounded-2xl border border-gray-200 space-y-3">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h3 class="text-xs font-bold text-indigo-950">Automated AI Bots</h3>
+                    <span class="text-[10px] text-gray-500 font-semibold">Stake: $1.00</span>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 flex justify-between items-center">
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-800">AutoDiffer</h4>
+                            <p class="text-[10px] text-gray-400">Random barrier digit differ strategy</p>
+                        </div>
+                        <span class="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">ACTIVE</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. SPEED BOT -->
+        <section id="tab-speed" class="tab-content hidden space-y-3">
+            <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
+                <h3 class="text-xs font-bold text-indigo-950 uppercase border-b pb-2">Trading Configuration</h3>
+
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 block mb-1">SYMBOL</label>
+                        <select class="w-full border border-gray-200 rounded-xl p-2 font-semibold">
+                            <option>Volatility 100 Index</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 block mb-1">STAKE AMOUNT ($)</label>
+                        <input type="number" value="1" class="w-full border border-gray-200 rounded-xl p-2 font-semibold">
+                    </div>
+                </div>
+
+                <button class="w-full bg-indigo-950 text-white font-bold text-xs py-2.5 rounded-xl shadow-md hover:bg-indigo-900">
+                    EXECUTE TRADES
+                </button>
+            </div>
+        </section>
+
     </main>
 
-    <!-- JavaScript Logic -->
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-5 w-full max-w-sm shadow-2xl relative space-y-3">
+            <button onclick="closeLoginModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-xs font-bold text-indigo-950 uppercase">Login With Deriv API Token</h3>
+            <input type="password" id="apiToken" placeholder="Enter API Token" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-xs outline-none focus:border-indigo-600">
+            <button onclick="loginWithToken()" class="w-full bg-indigo-950 text-white text-xs font-bold py-2 rounded-xl">Connect Account</button>
+        </div>
+    </div>
+
+    <!-- UI Logic Scripts -->
     <script>
-        let ws = null;
-        let activeSymbol = 'R_100';
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedToken = localStorage.getItem('deriv_api_token');
-            if (savedToken) {
-                document.getElementById('apiTokenInput').value = savedToken;
-                connectWithToken();
-            }
-        });
-
-        function openLoginModal() {
-            document.getElementById('loginModal').classList.remove('hidden');
+        function toggleDrawer() {
+            document.getElementById('drawer').classList.toggle('hidden');
         }
 
-        function closeLoginModal() {
-            document.getElementById('loginModal').classList.add('hidden');
-        }
-
-        function connectWithToken() {
-            const token = document.getElementById('apiTokenInput').value.trim();
-            if (!token) {
-                alert('Please enter a valid API Token');
-                return;
-            }
-
-            localStorage.setItem('deriv_api_token', token);
-            document.getElementById('livePrice').innerText = 'Connecting...';
-
-            if (ws) {
-                try { ws.close(); } catch(e){}
-            }
-
-            ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1010');
-
-            ws.onopen = () => {
-                ws.send(JSON.stringify({ authorize: token }));
-            };
-
-            ws.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-
-                if (data.msg_type === 'authorize') {
-                    if (data.error) {
-                        alert('Deriv Error: ' + data.error.message);
-                        disconnectToken();
-                        return;
-                    }
-                    closeLoginModal();
-                    document.getElementById('loggedOutNav').classList.add('hidden');
-                    document.getElementById('loggedInNav').classList.remove('hidden');
-                    document.getElementById('userAccountId').innerText = data.authorize.loginid;
-                    document.getElementById('userBalance').innerText = '$' + data.authorize.balance + ' ' + data.authorize.currency;
-
-                    // Subscribe to ticks
-                    subscribeTicks(activeSymbol);
-                }
-
-                if (data.msg_type === 'tick') {
-                    if (data.tick) {
-                        document.getElementById('livePrice').innerText = data.tick.quote;
-                    }
-                }
-            };
-
-            ws.onerror = () => {
-                document.getElementById('livePrice').innerText = 'Reconnecting...';
-            };
-        }
-
-        function subscribeTicks(symbol) {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({ forget_all: 'ticks' }));
-                ws.send(JSON.stringify({ ticks: symbol }));
-            }
-        }
-
-        function changeSymbol() {
-            activeSymbol = document.getElementById('symbolSelect').value;
-            subscribeTicks(activeSymbol);
-        }
-
-        function disconnectToken() {
-            localStorage.removeItem('deriv_api_token');
-            if (ws) {
-                try { ws.close(); } catch(e){}
-            }
-            document.getElementById('loggedInNav').classList.add('hidden');
-            document.getElementById('loggedOutNav').classList.remove('hidden');
-            document.getElementById('livePrice').innerText = 'Disconnected';
-        }
-
-        function switchTab(tabName) {
+        function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('bg-indigo-950', 'text-white');
-                btn.classList.add('bg-white', 'text-gray-700');
+                btn.classList.remove('bg-indigo-800', 'text-white');
+                btn.classList.add('text-indigo-200');
             });
 
-            const selectedTab = document.getElementById('tab-' + tabName);
-            const selectedBtn = document.getElementById('btn-' + tabName);
+            const selectedTab = document.getElementById('tab-' + tabId);
+            const selectedBtn = document.getElementById('btn-' + tabId);
 
             if (selectedTab) selectedTab.classList.remove('hidden');
             if (selectedBtn) {
-                selectedBtn.classList.remove('bg-white', 'text-gray-700');
-                selectedBtn.classList.add('bg-indigo-950', 'text-white');
-            }
-        }
-    </script>
-
-    <!-- Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js');
-        }
-    </script>
-</body>
-</html>
+                selectedBtn.classList.add('bg-indigo-800', 'text-white');
+                selectedBtn.classLis
