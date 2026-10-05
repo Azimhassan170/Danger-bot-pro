@@ -1,0 +1,227 @@
+app/index.tsx
+
+import { Image } from 'react-native';
+import { YStack, Card, Button, H2, Paragraph } from '@blinkdotnew/mobile-ui';
+import { useEffect, useMemo, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  ArrowLeft, ArrowRight, BookOpen, Check, Clock3, LogOut, Search,
+  ShieldCheck, Sparkles, Target, User, X,
+  Button, Input, ScrollView, SizableText, XStack, YStack,
+} from '@blinkdotnew/mobile-ui';
+import { blink } from '@/lib/blink';
+import type { CourseLessonsRow, LessonProgressRow } from '@/lib/db-types';
+
+const C = {
+  bg: '#101813', panel: '#18231C', raised: '#202D24', border: '#2B3B30',
+  text: '#F3F0E7', muted: '#A8B1A7', dim: '#758176', gold: '#D7AC62',
+  green: '#93B59A', greenDeep: '#253C2D', warning: '#E5C58B',
+};
+const lessonsTable = blink.db.table<CourseLessonsRow>('course_lessons');
+const progressTable = blink.db.table<LessonProgressRow>('lesson_progress');
+type UserInfo = { id: string; email: string };
+type Screen = 'learn' | 'progress' | 'account';
+
+function messageOf(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
+
+export default function Home() {
+  return (
+    <YStack flex={1} backgroundColor="$color2" justifyContent="center" padding="$5">
+      <Card elevation={4} bordered maxWidth={400} alignSelf="center" width="100%">
+        <Card.Header padded>
+          <YStack alignItems="center" gap="$3">
+            <Image
+              source={require('@/assets/images/icon.png')}
+              style={{ width: 80, height: 80 }}
+              resizeMode="contain"
+            />
+            <H2 textAlign="center">Welcome to Blink!</H2>
+            <Paragraph color="$color10" textAlign="center">
+              Let's start developing your mobile app
+            </Paragraph>
+  const queryClient = useQueryClient();
+  const [user, setUser] = useState<UserInfo | null>(null);
+  const [screen, setScreen] = useState<Screen>('learn');
+  const [selectedLesson, setSelectedLesson] = useState<CourseLessonsRow | null>(null);
+  const [search, setSearch] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [signingUp, setSigningUp] = useState(false);
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authError, setAuthError] = useState('');
+  const [authNotice, setAuthNotice] = useState('');
+  const [saveError, setSaveError] = useState('');
+
+  useEffect(() => blink.auth.onAuthStateChanged((state) => {
+    setUser(state.user ? { id: state.user.id, email: state.user.email } : null);
+  }), []);
+
+  const lessonsQuery = useQuery({
+    queryKey: ['course-lessons'],
+    queryFn: () => lessonsTable.list({ orderBy: { lessonOrder: 'asc' } }),
+  });
+  const progressQuery = useQuery({
+    queryKey: ['lesson-progress', user?.id],
+    queryFn: () => progressTable.list({ where: { userId: user!.id } }),
+    enabled: Boolean(user),
+  });
+  const lessons = lessonsQuery.data ?? [];
+  const progress = progressQuery.data ?? [];
+  const completedIds = useMemo(() => new Set(progress.filter((row) => row.completed).map((row) => row.lessonId)), [progress]);
+  const completedCount = completedIds.size;
+  const percentage = lessons.length ? Math.round((completedCount / lessons.length) * 100) : 0;
+  const filteredLessons = lessons.filter((lesson) => `${lesson.title} ${lesson.category}`.toLowerCase().includes(search.toLowerCase()));
+  const nextLesson = lessons.find((lesson) => !completedIds.has(lesson.id)) ?? lessons[0];
+
+  const saveProgress = useMutation({
+    mutationFn: async (lesson: CourseLessonsRow) => {
+      if (!user) throw new Error('Sign in to save your learning progress.');
+      const id = `progress_${user.id}_${lesson.id}`;
+      await progressTable.upsert({ id, userId: user.id, lessonId: lesson.id, completed: true, updatedAt: new Date().toISOString() });
+    },
+    onSuccess: () => {
+      setSaveError('');
+      void queryClient.invalidateQueries({ queryKey: ['lesson-progress', user?.id] });
+      setSelectedLesson(null);
+      setScreen('progress');
+    },
+    onError: (error) => setSaveError(messageOf(error)),
+  });
+
+  const submitAuth = async () => {
+    setAuthError('');
+    if (!email.trim() || !password) {
+      setAuthError('Enter your email and password to continue.');
+      return;
+    }
+    setAuthBusy(true);
+    try {
+      if (signingUp) await blink.auth.signUp({ email: email.trim(), password });
+      else await blink.auth.signInWithEmail(email.trim(), password);
+      setAuthNotice('Your progress will now sync to your account.');
+      setScreen('progress');
+    } catch (error) {
+      setAuthError(messageOf(error));
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
+  if (selectedLesson) {
+    const lesson = selectedLesson;
+    const done = completedIds.has(lesson.id);
+    return (
+      <YStack flex={1} backgroundColor={C.bg}>
+        <ScrollView flex={1} contentContainerStyle={{ paddingBottom: 36 }}>
+          <YStack width="100%" maxWidth={560} alignSelf="center" paddingHorizontal="$4" paddingTop="$4" gap="$5">
+            <Button chromeless alignSelf="flex-start" minHeight={48} onPress={() => setSelectedLesson(null)} pressStyle={{ opacity: 0.72 }}>
+              <XStack alignItems="center" gap="$2"><ArrowLeft size={18} color={C.gold} /><SizableText color={C.gold} size="$4">All lessons</SizableText></XStack>
+            </Button>
+            <YStack backgroundColor={C.greenDeep} borderColor={C.border} borderWidth={1} borderRadius="$6" padding="$5" gap="$3">
+              <XStack alignItems="center" gap="$2"><BookOpen size={16} color={C.gold} /><SizableText color={C.gold} size="$3" fontWeight="700">{lesson.category.toUpperCase()} · LESSON {lesson.lessonOrder}</SizableText></XStack>
+              <SizableText color={C.text} size="$8" fontWeight="800" lineHeight={38}>{lesson.title}</SizableText>
+              <XStack alignItems="center" gap="$2"><Clock3 size={15} color={C.muted} /><SizableText color={C.muted} size="$3">{lesson.durationMinutes} min read</SizableText></XStack>
+            </YStack>
+            <SizableText color={C.text} size="$5" fontWeight="700">The idea</SizableText>
+            <YStack gap="$4">
+              {lesson.content.split('\n\n').map((paragraph, index) => <SizableText key={`${lesson.id}-${index}`} color={C.muted} size="$4" lineHeight={25}>{paragraph}</SizableText>)}
+            </YStack>
+            <YStack backgroundColor={C.panel} borderColor={C.border} borderWidth={1} borderRadius="$5" padding="$4" gap="$2">
+              <XStack alignItems="center" gap="$2"><Target size={17} color={C.gold} /><SizableText color={C.gold} size="$3" fontWeight="700">TAKEAWAY</SizableText></XStack>
+              <SizableText color={C.text} size="$4" lineHeight={23}>{lesson.keyTakeaway}</SizableText>
+            </YStack>
+            <YStack backgroundColor="#29251D" borderRadius="$4" padding="$4" gap="$2">
+              <XStack alignItems="center" gap="$2"><ShieldCheck size={17} color={C.warning} /><SizableText color={C.warning} size="$3" fontWeight="700">EDUCATIONAL ONLY</SizableText></XStack>
+              <SizableText color={C.muted} size="$3" lineHeight={21}>This course explains market concepts. It is not financial advice, a trading signal, or a promise of results. Binary options can involve substantial risk.</SizableText>
+            </YStack>
+            {saveError ? <SizableText color="#F2A69A" size="$3">{saveError}</SizableText> : null}
+            <Button backgroundColor={done ? C.greenDeep : C.gold} borderRadius="$4" minHeight={54} disabled={done || saveProgress.isPending} onPress={() => {
+              if (!user) { setAuthNotice('Sign in to save this lesson to your progress.'); setSelectedLesson(null); setScreen('account'); return; }
+              saveProgress.mutate(lesson);
+            }} pressStyle={{ scale: 0.98, opacity: 0.9 }}>
+              <XStack alignItems="center" justifyContent="center" gap="$2">
+                {done ? <Check size={18} color={C.green} /> : null}
+                <SizableText color={done ? C.green : '#192017'} size="$4" fontWeight="800">{done ? 'Lesson completed' : saveProgress.isPending ? 'Saving progress…' : 'Mark lesson complete'}</SizableText>
+              </XStack>
+            </Button>
+          </YStack>
+        </Card.Header>
+        <Card.Footer padded>
+          <Button theme="active" width="100%" onPress={() => console.log('Get Started!')}>
+            Get Started
+          </Button>
+        </Card.Footer>
+      </Card>
+        </ScrollView>
+        <BottomNav screen={screen} onChange={(next) => { setSelectedLesson(null); setScreen(next); }} />
+      </YStack>
+    );
+  }
+
+  return (
+    <YStack flex={1} backgroundColor={C.bg}>
+      <ScrollView flex={1} contentContainerStyle={{ paddingBottom: 32 }}>
+        <YStack width="100%" maxWidth={560} alignSelf="center" paddingHorizontal="$4" paddingTop="$5" gap="$5">
+          <XStack alignItems="center" justifyContent="space-between">
+            <XStack alignItems="center" gap="$3">
+              <YStack width={42} height={42} borderRadius="$4" backgroundColor={C.greenDeep} alignItems="center" justifyContent="center"><BookOpen size={21} color={C.gold} /></YStack>
+              <YStack gap={0}><SizableText color={C.text} size="$5" fontWeight="800">Marketwise</SizableText><SizableText color={C.muted} size="$2">COURSE COMPANION</SizableText></YStack>
+            </XStack>
+            <Button circular width={46} height={46} backgroundColor={C.panel} borderColor={C.border} borderWidth={1} onPress={() => { setScreen('account'); setAuthError(''); }} pressStyle={{ scale: 0.96 }} aria-label="Account"><User size={19} color={C.text} /></Button>
+          </XStack>
+
+          {screen === 'learn' ? <>
+            <YStack backgroundColor={C.greenDeep} borderColor={C.border} borderWidth={1} borderRadius="$6" padding="$5" gap="$4">
+              <XStack alignItems="center" gap="$2"><Sparkles size={16} color={C.gold} /><SizableText color={C.gold} size="$3" fontWeight="700">YOUR LEARNING PATH</SizableText></XStack>
+              <SizableText color={C.text} size="$8" fontWeight="800" lineHeight={37}>Learn the market.{"\n"}Know the risks.</SizableText>
+              <SizableText color={C.muted} size="$4" lineHeight={23}>Short, clear lessons to help you understand charts, contracts, and uncertainty.</SizableText>
+              <XStack alignItems="center" gap="$3" paddingTop="$1">
+                <YStack flex={1} gap="$2"><XStack justifyContent="space-between"><SizableText color={C.muted} size="$3">Course progress</SizableText><SizableText color={C.text} size="$3" fontWeight="700">{user ? `${percentage}%` : 'Sign in to track'}</SizableText></XStack><YStack height={7} backgroundColor="#35483A" borderRadius="$10"><YStack width={`${user ? percentage : 0}%`} height={7} backgroundColor={C.gold} borderRadius="$10" /></YStack></YStack>
+              </XStack>
+              <Button backgroundColor={C.gold} borderRadius="$4" minHeight={50} onPress={() => nextLesson && setSelectedLesson(nextLesson)} pressStyle={{ scale: 0.98, opacity: 0.9 }} disabled={!nextLesson}>
+                <XStack alignItems="center" justifyContent="center" gap="$2"><SizableText color="#192017" size="$4" fontWeight="800">{completedCount ? 'Continue learning' : 'Start learning'}</SizableText><ArrowRight size={17} color="#192017" /></XStack>
+              </Button>
+            </YStack>
+
+            <XStack gap="$3">
+              <StatCard icon={<BookOpen size={17} color={C.gold} />} value={`${lessons.length || '—'}`} label="short lessons" />
+              <StatCard icon={<Clock3 size={17} color={C.gold} />} value="56 min" label="total reading" />
+              <StatCard icon={<ShieldCheck size={17} color={C.gold} />} value="Risk-first" label="approach" />
+            </XStack>
+
+            <YStack gap="$3">
+              <XStack alignItems="flex-end" justifyContent="space-between"><YStack gap="$1"><SizableText color={C.text} size="$6" fontWeight="800">Course outline</SizableText><SizableText color={C.muted} size="$3">Build understanding one idea at a time</SizableText></YStack><SizableText color={C.dim} size="$3">{completedCount}/{lessons.length}</SizableText></XStack>
+              <XStack alignItems="center" backgroundColor={C.panel} borderColor={C.border} borderWidth={1} borderRadius="$4" paddingHorizontal="$3" gap="$2"><Search size={17} color={C.dim} /><Input flex={1} value={search} onChangeText={setSearch} placeholder="Find a lesson" placeholderTextColor={C.dim} backgroundColor="transparent" borderWidth={0} color={C.text} fontSize="$4" minHeight={46} /></XStack>
+              {lessonsQuery.isLoading ? <LessonSkeleton /> : null}
+              {lessonsQuery.isError ? <ErrorPanel message={messageOf(lessonsQuery.error)} onRetry={() => void lessonsQuery.refetch()} /> : null}
+              {!lessonsQuery.isLoading && !lessonsQuery.isError && filteredLessons.length === 0 ? <SizableText color={C.muted} size="$4" padding="$4">No lessons match that search.</SizableText> : null}
+              {filteredLessons.map((lesson, index) => {
+                const done = completedIds.has(lesson.id);
+                return <Button key={lesson.id} width="100%" minHeight={76} paddingHorizontal="$3" backgroundColor={C.panel} borderColor={C.border} borderWidth={1} borderRadius="$4" onPress={() => setSelectedLesson(lesson)} pressStyle={{ scale: 0.985, opacity: 0.86 }}>
+                  <XStack alignItems="center" width="100%" gap="$3">
+                    <YStack width={38} height={38} borderRadius="$3" backgroundColor={done ? C.greenDeep : C.raised} alignItems="center" justifyContent="center"><SizableText color={done ? C.green : C.gold} size="$3" fontWeight="800">{done ? <Check size={17} color={C.green} /> : String(index + 1).padStart(2, '0')}</SizableText></YStack>
+                    <YStack flex={1} alignItems="flex-start" gap="$1"><SizableText color={C.text} size="$4" fontWeight="700" textAlign="left">{lesson.title}</SizableText><XStack alignItems="center" gap="$2"><SizableText color={C.muted} size="$2">{lesson.category}</SizableText><SizableText color={C.dim} size="$2">·</SizableText><SizableText color={C.muted} size="$2">{lesson.durationMinutes} min</SizableText></XStack></YStack>
+                    <ArrowRight size={17} color={C.dim} />
+                  </XStack>
+                </Button>;
+              })}
+              <SizableText color={C.dim} size="$2" lineHeight={18}>Starter curriculum for learning purposes; it is not the course content from BinaryTool. No lesson is a recommendation to place a trade.</SizableText>
+            </YStack>
+          </> : null}
+
+          {screen === 'progress' ? <YStack gap="$5">
+            <YStack gap="$2"><SizableText color={C.text} size="$8" fontWeight="800">Your progress</SizableText><SizableText color={C.muted} size="$4">A steady learning habit starts with one lesson.</SizableText></YStack>
+            {!user ? <YStack backgroundColor={C.panel} borderColor={C.border} borderWidth={1} borderRadius="$5" padding="$4" gap="$3"><SizableText color={C.text} size="$5" fontWeight="700">Keep your place</SizableText><SizableText color={C.muted} size="$3" lineHeight={21}>Sign in to save completed lessons and pick up where you left off.</SizableText><Button backgroundColor={C.gold} borderRadius="$4" minHeight={48} onPress={() => { setScreen('account'); setAuthNotice('Sign in to save and sync your progress.'); }}><SizableText color="#192017" fontWeight="800">Sign in</SizableText></Button></YStack> : <>
+              <YStack backgroundColor={C.greenDeep} borderColor={C.border} borderWidth={1} borderRadius="$5" padding="$5" gap="$3"><SizableText color={C.muted} size="$3">COURSE COMPLETION</SizableText><XStack alignItems="flex-end" gap="$2"><SizableText color={C.text} size="$9" fontWeight="800">{percentage}%</SizableText><SizableText color={C.muted} size="$4" paddingBottom="$2">{completedCount} of {lessons.length} lessons</SizableText></XStack><YStack height={8} backgroundColor="#35483A" borderRadius="$10"><YStack width={`${percentage}%`} height={8} backgroundColor={C.gold} borderRadius="$10" /></YStack><SizableText color={C.muted} size="$3">{user.email}</SizableText></YStack>
+              <YStack gap="$3"><SizableText color={C.text} size="$5" fontWeight="700">Completed lessons</SizableText>{progressQuery.isLoading ? <LessonSkeleton /> : null}{lessons.filter((lesson) => completedIds.has(lesson.id)).map((lesson) => <XStack key={lesson.id} backgroundColor={C.panel} borderRadius="$4" padding="$3" alignItems="center" gap="$3"><Check size={17} color={C.green} /><SizableText color={C.text} size="$4" flex={1}>{lesson.title}</SizableText><SizableText color={C.muted} size="$2">Done</SizableText></XStack>)}{completedCount === 0 && !progressQuery.isLoading ? <SizableText color={C.muted} size="$3">Your finished lessons will appear here.</SizableText> : null}</YStack>
+            </>}</YStack> : null}
+
+          {screen === 'account' ? <YStack gap="$5">
+            <XStack alignItems="center" justifyContent="space-between"><SizableText color={C.text} size="$8" fontWeight="800">Your account</SizableText><Button circular width={44} height={44} chromeless onPress={() => setScreen('learn')} aria-label="Close"><X size={19} color={C.muted} /></Button></XStack>
+            {user ? <YStack backgroundColor={C.panel} borderColor={C.border} borderWidth={1} borderRadius="$5" padding="$4" gap="$4"><XStack alignItems="center" gap="$3"><YStack width={46} height={46} borderRadius="$10" backgroundColor={C.greenDeep} alignItems="center" justifyContent="center"><User size={21} color={C.green} /></YStack><YStack gap="$1"><SizableText color={C.text} size="$4" fontWeight="700">Signed in</SizableText><SizableText color={C.muted} size="$3">{user.email}</SizableText></YStack></XStack><SizableText color={C.muted} size="$3">Your lesson progress is saved to this account.</SizableText><Button backgroundColor={C.raised} borderColor={C.border} borderWidth={1} borderRadius="$4" minHeight={48} onPress={async () => { await blink.auth.signOut(); setScreen('learn'); }}><XStack alignItems="center" gap="$2"><LogOut size={17} color={C.text} /><SizableText color={C.text}>Sign out</SizableText></XStack></Button></YStack> : <YStack backgroundColor={C.panel} borderColor={C.border} borderWidth={1} borderRadius="$5" padding="$5" gap="$4">
+              <YStack width={48} height={48} borderRadius="$4" backgroundColor={C.greenDeep} alignItems="center" justifyContent="center"><ShieldCheck size={23} color={C.gold} /></YStack>
+              <YStack gap="$2"><SizableText color={C.text} size="$6" fontWeight="800">Save your progress</SizableText><SizableText color={C.muted} size="$3" lineHeight={21}>Create an account or sign in to keep your completed lessons in sync.</SizableText></YStack>
+              {authNotice ? <SizableText color={C.gold} size="$3">{authNotice}</SizableText> : null}
+              <YStack gap="$2"><SizableText color={C.muted} size="$3">Email</SizableText><Input value={email} onChangeText={setEmail} placeholder="you@ex
